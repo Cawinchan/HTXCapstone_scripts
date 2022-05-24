@@ -3,25 +3,6 @@
 float mlx90640To[768];
 paramsMLX90640 mlx90640;
 
-boolean isConnected() {
-    Wire.beginTransmission((uint8_t)MLX90640_address);
-    if (Wire.endTransmission() != 0)
-        return (false);  // Sensor did not ACK
-    return (true);
-}
-
-std::string img_to_string(const float* mlx90640To, const int size_bytes) {
-    std::string img_string;
-
-    const int arr_len = size_bytes / sizeof(mlx90640To[0]);
-
-    for (int i = 0; i < arr_len; i++) {
-        img_string.append(std::to_string(mlx90640To[i]));
-        img_string.append(", ");
-    }
-    return img_string;
-}
-
 void setup_MLX90640() {
     Wire.begin();
     Wire.setClock(400000);  // Increase I2C clock speed to 400kHz
@@ -69,4 +50,27 @@ void sample_MLX90640(float* mlx90640To) {
 
         MLX90640_CalculateTo(mlx90640Frame, &mlx90640, emissivity, tr, mlx90640To);
     }
+}
+
+String img_to_string(const float* mlx90640To, const int size_bytes) {
+    String img_string;
+
+    const int arr_len = size_bytes / sizeof(mlx90640To[0]);
+
+    for (int i = 0; i < arr_len; i++) {
+        img_string += String(mlx90640To[i]) + ", ";
+    }
+    return img_string;
+}
+
+int to_byte_array(const float* data, const int size_bytes, byte* byte_arr) {
+    memcpy(byte_arr, data, size_bytes);
+    return size_bytes;
+}
+
+boolean isConnected() {
+    Wire.beginTransmission((uint8_t)MLX90640_address);
+    if (Wire.endTransmission() != 0)
+        return (false);  // Sensor did not ACK
+    return (true);
 }
