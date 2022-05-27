@@ -11,6 +11,7 @@ void setup(void)
 
   // Print the header
   char* output = "Timestamp [ms], raw temperature [°C], pressure [hPa], raw relative humidity [%], gas [Ohm], IAQ, IAQ accuracy, temperature [°C], relative humidity [%], Static IAQ, CO2 equivalent, breath VOC equivalent";
+
   Serial.println(output);
 }
 
