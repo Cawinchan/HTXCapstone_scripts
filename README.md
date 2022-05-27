@@ -11,4 +11,5 @@ Code should contain the following functions as API:
 
 ## Tip
 
-Do not use `stdlib`, use Arduino library instead. (better on memory)
+* Do not use `stdlib`, use Arduino library instead. (better on memory)
+* To optimise the use of `String` from Arduino library, use `sprinf` instead. ([tutorial](https://cpp4arduino.com/2020/02/07/how-to-format-strings-without-the-string-class.html)) 
