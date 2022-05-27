@@ -2,7 +2,7 @@
 
 Servo myservo;  
 
-int pos = 180; 
+int pos = 0; 
 int servoPin = 13;
 int default_degree = 10;
 //String data_packet = "esp pan 1\n"; //sample input
@@ -17,7 +17,7 @@ void setup() {
   myservo.setPeriodHertz(50);    // standard 50 hz servo
   myservo.attach(servoPin, 500, 2400); // attaches the servo on pin 13 to the servo object
   
-  pos = myservo.read(); //updates the current position of the servo
+  pos = myservo.read(); //updates the last sent position of the servo
   
   // using default min/max of 1000us and 2000us
   // different servos may require different min/max settings
