@@ -2,11 +2,11 @@
 
 Servo myservo;  
 
-int pos = 0; 
-int servoPin = 13;
-int default_degree = 10;
-//String data_packet = "esp pan 1\n"; //sample input
-String data_packet = "";
+int pos = 0; //initialise the initial position variable, not pin
+int servoPin = 13; //indicate the pin on ESP32
+int default_degree = 10; //a constant defined
+//String data_packet = "esp pan 1"; //sample input --> input command in serial moniter
+String data_packet = ""; //initilaise the data packet var
 
 void setup() {
 //   Allow allocation of all timers
@@ -31,9 +31,6 @@ void loop()
     // Implement reading the ESP32 serial 
     while (!Serial.available());
     data_packet = Serial.readStringUntil('\n');
-    Serial.println(data_packet);
-    Serial.println("read");
-
     if (data_packet == "esp pan -1"){ // pan left 
         pos = pos-default_degree;
         if (pos < 0){
