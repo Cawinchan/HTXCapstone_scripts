@@ -1,5 +1,4 @@
 # HTXCapstone
-> Capstone Project S15 HTX: Sensor subsystem for Urban Search and Rescue. 
 
 Code should contain the following functions as API:
 
