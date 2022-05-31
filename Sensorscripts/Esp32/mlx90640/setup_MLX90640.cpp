@@ -28,8 +28,8 @@ void setup_MLX90640() {
 
     // MLX90640_SetRefreshRate(MLX90640_address, 0x02); //Set rate to 2Hz
     //  MLX90640_SetRefreshRate(MLX90640_address, 0x03); //Set rate to 4Hz
-    //    MLX90640_SetRefreshRate(MLX90640_address, 0x04); //Set rate to 8Hz Most optimal speed to accuracy
-    MLX90640_SetRefreshRate(MLX90640_address, 0x05);  // Set rate to 16Hz
+        MLX90640_SetRefreshRate(MLX90640_address, 0x04); //Set rate to 8Hz Most optimal speed to accuracy
+//    MLX90640_SetRefreshRate(MLX90640_address, 0x05);  // Set rate to 16Hz
 }
 
 void sample_MLX90640(float* mlx90640To) {
@@ -58,7 +58,10 @@ String img_to_string(const float* mlx90640To, const int size_bytes) {
     const int arr_len = size_bytes / sizeof(mlx90640To[0]);
 
     for (int i = 0; i < arr_len; i++) {
-        img_string += String(mlx90640To[i]) + ", ";
+      img_string += String(mlx90640To[i]) ;   
+      if (i != arr_len-1){
+        img_string += ",";
+      }
     }
     return img_string;
 }

@@ -36,7 +36,7 @@ void setup()
     Serial.begin(115200);  // Fast serial as possible
 
     while (!Serial);  // Wait for user to open terminal
-    // Serial.println("MLX90640 IR Array Example");
+     Serial.println("MLX90640 IR Array Example");
 
     setup_MLX90640();
 }
