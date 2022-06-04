@@ -33,7 +33,7 @@ int incomingByte = 0;   // for incoming serial data
 
 void setup() {
 
-  myservo.attach(14, 16); // Control pin (white), signal/feedback pin (yellow) but out motor does not have this (put random pin)
+  myservo.attach(14, 16); // Control pin, signal/feedback pin but our motor does not have this (put random pin)
     
   // using default min/max of 1000us and 2000us
   // different servos may require different min/max settings
@@ -53,13 +53,13 @@ void loop() {
                 // say what you got:
                 Serial.print("received: ");
                 Serial.print (incomingByte);
-                if(incomingByte == 76){                        //Press L (check serial monitor to view received value)
+                if(incomingByte == 76){                        //Press L - unreel (check serial monitor to view received value)
                  Serial.println(" sent 0 Rotaing CW "); 
                  myservo.spin(40);           //define rounds per minute... but writing 40 == 6 rpm
-                }else if(incomingByte == 82){                  //Press R
+                }else if(incomingByte == 82){                  //Press R - retract
                   Serial.println(" sent 180 Rotaing CCW "); 
                   myservo.spin(-140); 
-                }else if(incomingByte == 83){                   //Press S
+                }else if(incomingByte == 83){                   //Press S - stop
                   Serial.println(" sent Stopped "); 
                   myservo.spin(0); 
                 }else{
