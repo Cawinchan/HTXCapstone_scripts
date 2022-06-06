@@ -8,9 +8,7 @@ void setup_MLX90640() {
     Wire.setClock(400000);  // Increase I2C clock speed to 400kHz
 
     if (isConnected() == false) {
-        Serial.println("MLX90640 not detected at default I2C address. Please check wiring. Freezing.");
-        while (1)
-            ;
+        Serial.println("MLX90640 not detected at default I2C address. Please check wiring.");
     }
 
     // Get device parameters - We only have to do this once
