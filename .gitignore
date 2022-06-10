@@ -1,3 +1,5 @@
-Sensorscripts/Python/IR/mask_rcnn_coco.h5
+# Ignore model extensions
 
+*.h5
 *.png
+*.pkl
