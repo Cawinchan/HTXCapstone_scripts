@@ -1,3 +1,5 @@
+# Python script for ROS interface using Serial communication
+
 # Imports 
 import numpy as np
 import torch
