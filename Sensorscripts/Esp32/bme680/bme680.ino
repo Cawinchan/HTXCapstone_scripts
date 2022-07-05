@@ -10,7 +10,7 @@ void setup(void)
   setup_bme680();
 
   // Print the header
-  char* output = "Timestamp [ms], raw temperature [°C], pressure [hPa], raw relative humidity [%], gas [Ohm], IAQ, IAQ accuracy, temperature [°C], relative humidity [%], Static IAQ, CO2 equivalent, breath VOC equivalent";
+  char* output = "Timestamp [ms], IAQ, IAQ accuracy, CO2 equivalent, breath VOC equivalent, IAQ Rate of Change";
 
   Serial.println(output);
 }
