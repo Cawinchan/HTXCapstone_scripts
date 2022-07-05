@@ -5,15 +5,8 @@ extern Bsec iaqSensor;
 
 struct BMEReading {
     int64_t timeStamp;
-    float rawTemperature;
-    float pressure;
-    float rawHumidity;
-    float gasResistance;
     float iaq;
     uint8_t iaqAccuracy;
-    float temperature;
-    float humidity;
-    float staticIaq;
     float co2Equivalent;
     float breathVocEquivalent;
 };
