@@ -30,7 +30,7 @@ void setup_bme680(void) {
 BMEReading sample_bme680(void) {
     if (iaqSensor.run()) {  // If new data is available
         BMEReading output{
-            iaqSensor.outputTimestamp,
+            iaqSensor.outputTimestamp / 1000.0,
             iaqSensor.iaq,
             iaqSensor.iaqAccuracy,
             iaqSensor.co2Equivalent,
@@ -44,19 +44,33 @@ BMEReading sample_bme680(void) {
 }
 
 String BMEReading_to_string(const BMEReading &bme_reading) {
-    String output = String((unsigned long) bme_reading.timeStamp);
+    String output = String(bme_reading.timeStamp);
     current_iaq = iaqSensor.iaq;
     output += ", " + String(current_iaq);                         // IAQ values
     output += ", " + String(bme_reading.iaqAccuracy);             // When IAQ is ready to be used
     output += ", " + String(bme_reading.co2Equivalent);           // Co2Equivalent values
     output += ", " + String(bme_reading.breathVocEquivalent);     // BreathVocEquivalent values
-    output += ", " + String(((current_iaq / past_iaq) - 1)*1000); // IAQ Rate of Change
     return output;
 }
 
 int to_byte_array(const BMEReading &data, byte *byte_arr) {
-    memcpy(byte_arr, &data, sizeof(data));
-    return (sizeof(data));
+    int data_in = 0;
+
+    // This lambda function is to increment the data_in pointer,
+    // so that it writes into the whole data array.
+    // Since C++ does not allow multiple type arguments, we need to cast to char* first.
+    auto load_data = [&data, &data_in, &byte_arr] (const char* element, const int size) {
+        memcpy(byte_arr + data_in, element, size);
+        data_in += size;
+    };
+    
+    load_data((char *) &data.timeStamp, sizeof(data.timeStamp));
+    load_data((char *) &data.iaq, sizeof(data.iaq));
+    load_data((char *) &data.iaqAccuracy, sizeof(data.iaqAccuracy));
+    load_data((char *) &data.co2Equivalent, sizeof(data.co2Equivalent));
+    load_data((char *) &data.breathVocEquivalent, sizeof(data.breathVocEquivalent));
+
+    return (sizeof_BMEReading);
 }
 
 void checkIaqSensorStatus(void) {
