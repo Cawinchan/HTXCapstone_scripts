@@ -29,7 +29,13 @@ IMUReading sample_bmi160() {
     // Get both accel and gyro data from bmi160
     // Parameter accelGyro and timestamp is the pointer to store the data
     int rslt = bmi160.getAccelGyroData(accelGyro, timestamp);
+    // Possible nonsense data: When the device is not connected, somehow rslt will still be valid
+    // timestamp will be 16777215 and every element of accelGyro will be -1.
+    // TODO: Solve for such an issue so that nonsense data doesn't get passed on to ROS.
+
     if (rslt == 0) {
+        // timestamp[0] should be the same as timestamp[1], and therefore we only calc one.
+        output.timestamp = (timestamp[0] * 39) / 1000000.0;
         for (int i = 0; i < 6; i++) {
             if (i < 3) {
                 // The first three are gyro datas
@@ -42,11 +48,10 @@ IMUReading sample_bmi160() {
                 output.accel[i - 3] = (accelGyro[i] / 16384.0) * 9.80665;
             }
         }
-        // timestamp[0] should be the same as timestamp[1], and therefore we only calc one.
-        output.timestamp = (timestamp[0] * 39) / 1000000.0;
 
     } else {
         Serial.println("sample_bmi160: error - unable to retrieve IMU reading");
+        output.timestamp = -1;
     }
     return output;
 }
@@ -54,18 +59,29 @@ IMUReading sample_bmi160() {
 String IMUReading_to_string(const IMUReading &imu_reading) {
     String output;
 
-    for (int i = 0; i < 3; i++) {
-        output += String(imu_reading.gyro[i]) + "\t";
-    }
+    output += String(imu_reading.timestamp);
     for (int i = 0; i < 3; i++) {
         output += String(imu_reading.accel[i]) + "\t";
     }
-    output += String(imu_reading.timestamp);
+    for (int i = 0; i < 3; i++) {
+        output += String(imu_reading.gyro[i]) + "\t";
+    }
 
     return output;
 }
 
 int to_byte_array(const IMUReading &data, byte *byte_arr) {
-    memcpy(byte_arr, &data, sizeof(data));
-    return (sizeof(data));
+    int data_in = 0;
+    int num_bytes = 0;
+
+    num_bytes = sizeof(data.timestamp);
+    memcpy(byte_arr, &data.timestamp, num_bytes);
+    data_in += num_bytes;
+
+    num_bytes = sizeof(data.accel);
+    memcpy(byte_arr + data_in, &data.accel, num_bytes);
+    data_in += num_bytes;
+
+    memcpy(byte_arr + data_in, &data.gyro, sizeof(data.gyro));
+    return (sizeof_IMUReading);
 }
