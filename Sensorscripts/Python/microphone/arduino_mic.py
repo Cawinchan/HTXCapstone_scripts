@@ -48,5 +48,5 @@ def predict(model):
     # get the confidences and add them to the list to plot them later
     new_confidence = model(torch.from_numpy(audio_float32), 16000).item()
 
-    return new_confidence, sample
+    return new_confidence
     
