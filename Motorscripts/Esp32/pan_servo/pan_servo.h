@@ -1,4 +1,4 @@
-#include <ESP32Servo.h>
+#include <Arduino.h>
 
 // Returns the pin OUTPUT to servo
 int setup_pan_servo();
@@ -16,7 +16,9 @@ void actuate_pan_servo(float degree);
 // Converts degrees to duty cycle.
 void set_pan_servo_pos(float degree);
 
-int get_pan_servo_degrees();
+// Read degrees.
+// Converts duty cycle to degrees.
+float get_pan_servo_pos();
 
 // Clip pan::pos to within [0, 180]
 void clip_pan_servo_degrees();
