@@ -16,7 +16,7 @@ SAMPLE_RATE = 16000
 CHUNK = int(SAMPLE_RATE / 10)
 
 
-def setup():
+def setup_human_sound_detection():
     model, _ = torch.hub.load(repo_or_dir='snakers4/silero-vad',
                                 model='silero_vad',
                                 force_reload=True)
@@ -32,7 +32,7 @@ def int2float(sound):
     sound = sound.squeeze()  # depends on the use case
     return sound
 
-def predict(model):
+def predict_human_sound_detection(model):
     ser = serial.Serial('COM4', 115200)
     
     sample = ser.readline()
@@ -45,8 +45,8 @@ def predict(model):
 
     audio_float32 = int2float(audio_int16)
     
-    # get the confidences and add them to the list to plot them later
-    new_confidence = model(torch.from_numpy(audio_float32), 16000).item()
+    # get the human likelihood probability
+    human_likelihood_prob = model(torch.from_numpy(audio_float32), 16000).item()
 
-    return new_confidence
+    return human_likelihood_prob
     

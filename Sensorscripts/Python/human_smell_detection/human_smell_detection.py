@@ -9,7 +9,7 @@ import serial
 def human_breath_detector(iaq,max_iaq,base_iaq):
     return (iaq / (max_iaq-base_iaq))
 
-def predict(model):
+def predict_human_smell_detection(model):
     MAX_IAQ = 250
     IAQ_base = 50
     
@@ -23,7 +23,7 @@ def predict(model):
     IAQ = float(arr[1].strip())
     IAQ_accuracy = int(arr[2].strip())
     IAQ_roc = float(arr[-1].replace('\r\n',''))
-    probability = 0
+    human_likelihood_prob = 0
     if IAQ_accuracy < 1 and printer:
         print("IAQ Warming up")
         printer = False
@@ -33,10 +33,10 @@ def predict(model):
     # Signal change: Update IAQ_base value
     if IAQ_roc > 32 and IAQ_accuracy > 0:
         IAQ_base = IAQ
-    probability = (IAQ / (MAX_IAQ-IAQ_base))
-    if probability > 1:
-        probability = 1
-    if probability < 0:
-        probability = 0
-    return probability
+    human_likelihood_prob = (IAQ / (MAX_IAQ-IAQ_base))
+    if human_likelihood_prob > 1:
+        human_likelihood_prob = 1
+    if human_likelihood_prob < 0:
+        human_likelihood_prob = 0
+    return human_likelihood_prob
     
