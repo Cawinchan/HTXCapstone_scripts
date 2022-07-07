@@ -96,4 +96,4 @@ Code should contain the following functions as API:
 
 
 ### Things to note
-Each model_directory contains a jupyter notebook called `<model_name>_stream.ipynb` that allows for real-time sensor reading and prediction values for testing purposes.
+Each model detection directory contains a jupyter notebook called `<model_name>_stream.ipynb` that allows for real-time sensor reading and prediction values for testing purposes.
