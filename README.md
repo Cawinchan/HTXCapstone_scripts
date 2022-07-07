@@ -91,11 +91,9 @@ Code should contain the following functions as API:
 
 * `setup_<model_name>` - initializes the sensor, called in `setup()`.
 * `predict_<sensor_name>` - predict once from sensor values, called in `loop()`.
-* `<sensor_data>_to_string` - converts it to Arduino `String` for `Serial.print()`.
-* `to_byte_array` - converts it to byte array for `Serial.write()`.
 
 `<model_name>` : human_smell_detection, human_sound_detection, human_body_detection
 
 
 ### Things to note
-Each model_directory contains a jupyter notebook that allows for real-time sensor reading and prediction values for testing
+Each model detection directory contains a jupyter notebook called `<model_name>_stream.ipynb` that allows for real-time sensor reading and prediction values for testing purposes.
