@@ -1,9 +1,7 @@
 #include <ESP32Servo.h>
 
 // Returns the pin OUTPUT to servo
-void setup_pan_servo();
-
-void set_servo_pos();
+int setup_pan_servo();
 
 // Actuate PanServo by degree.
 // Negative pan left, positive pan right.
@@ -12,6 +10,13 @@ void set_servo_pos();
 // Note that the final position might not be the current pos + degree,
 //     as servo might not complete the full turn
 // Note that degree needs to be above 1 to see a change in position.
-void actuate_pan_servo(int channel, float degree);
+void actuate_pan_servo(float degree);
+
+// Write duty cycle to servo.
+// Converts degrees to duty cycle.
+void set_pan_servo_pos(float degree);
 
 int get_pan_servo_degrees();
+
+// Clip pan::pos to within [0, 180]
+void clip_pan_servo_degrees();
