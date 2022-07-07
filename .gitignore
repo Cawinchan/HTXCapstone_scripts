@@ -4,3 +4,4 @@
 *.png
 *.pkl
 *.xlsx
+.ipynb_checkpoints
