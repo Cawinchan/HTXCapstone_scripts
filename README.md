@@ -1,4 +1,42 @@
-# HTXCapstone
+# HTXCapstone Scripts
+
+# Quick overview
+Submodule of [HTXCapstone ESP32](https://github.com/LoJunKai/HTXCapstone_esp32) that handles all API's of Sensor and Motors in SLEEK's robotic movement and human detection sensing. 
+
+# How to Run 
+
+## Prerequisites
+- ArduinoIDE 
+- ESP32 (Doit ESP32 Devkit V1)
+
+Each indiviudal script can be opened by Arduino IDE, however the entire project should be accessed through PlatformIO in [HTXCapstone ESP32](https://github.com/LoJunKai/HTXCapstone_esp32). 
+
+# Repository Directiory
+```
+  ├── Motorscripts
+  |   └──Esp32
+  │        └── examples
+  |             ├── pan_servo_button_input
+  |             └── reel_servo_user_input
+  |        ├── pan_servo
+  |        └── reel_servo
+  |        
+  |        
+  ├── Sensorscripts     
+  |   └── Esp32
+  |        ├── bme680
+  |        ├── bmi160
+  |        ├── microphone
+  |        └── mlx90640
+  |   └── Python 
+  |         ├── co2
+  |         ├── ir
+  |         └── microphone
+  |
+  ├── .gitignore
+  ├── README.md
+  └── requirements.txt
+```
 
 ## Sensor API
 Code should contain the following functions as API:
