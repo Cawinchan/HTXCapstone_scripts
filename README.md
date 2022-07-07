@@ -7,6 +7,13 @@ Code should contain the following functions as API:
 * `<sensor_data>_to_string` - converts it to Arduino `String` for `Serial.print()`.
 * `to_byte_array` - converts it to byte array for `Serial.write()`.
 
+If the sensor uses a struct to keep track of the data received, be sure to do the following:
+* Initialize the struct in the header file.
+* Calculate the size of individual elements.
+  * `constexpr int sizeof_<sensor_name> = sizeof(<individual elements>) + ...`
+  * This is because `sizeof(<struct>)` will include unwanted padding.
+* In `to_byte_array` be sure manually call `memcpy` for each element, in the **sequence it is initialised** to be consistent.
+
 
 ## Tip
 
