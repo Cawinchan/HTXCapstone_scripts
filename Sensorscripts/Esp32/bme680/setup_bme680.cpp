@@ -30,7 +30,7 @@ void setup_bme680(void) {
 BMEReading sample_bme680(void) {
     if (iaqSensor.run()) {  // If new data is available
         BMEReading output{
-            iaqSensor.outputTimestamp / 1000.0,
+            iaqSensor.outputTimestamp,
             iaqSensor.iaq,
             iaqSensor.iaqAccuracy,
             iaqSensor.co2Equivalent,
@@ -44,12 +44,13 @@ BMEReading sample_bme680(void) {
 }
 
 String BMEReading_to_string(const BMEReading &bme_reading) {
-    String output = String(bme_reading.timeStamp);
+    String output = String(bme_reading.timeStamp/ 1000.0);
     current_iaq = iaqSensor.iaq;
     output += ", " + String(current_iaq);                         // IAQ values
     output += ", " + String(bme_reading.iaqAccuracy);             // When IAQ is ready to be used
     output += ", " + String(bme_reading.co2Equivalent);           // Co2Equivalent values
     output += ", " + String(bme_reading.breathVocEquivalent);     // BreathVocEquivalent values
+    output += ", " + String(((current_iaq / past_iaq) - 1)*1000); // IAQ Rate of Change
     return output;
 }
 

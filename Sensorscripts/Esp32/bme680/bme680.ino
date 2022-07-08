@@ -11,7 +11,6 @@ void setup(void)
 
   // Print the header
   char* output = "Timestamp [ms], IAQ, IAQ accuracy, CO2 equivalent, breath VOC equivalent, IAQ Rate of Change";
-
   Serial.println(output);
 }
 
