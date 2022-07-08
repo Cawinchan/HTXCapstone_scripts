@@ -74,6 +74,7 @@ void loop()      //loops repeatedly from start to end
     //assign output voltage to the DAC board
     DAC.outputVoltage(OUTPUT_VOLTAGE); 
 
+  //not necessarily needed --> reads output from regulator
     //read ITV monitor output
     sensorValue = analogRead(sensorPin);  
     voltageRead = sensorValue*5/1023;      //conversion
