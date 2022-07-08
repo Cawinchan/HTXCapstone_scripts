@@ -8,7 +8,7 @@ import serial
 MAX_IAQ = 250
 IAQ_base = 50 # Inital IAQ_base value 
 
-class human_breath_detector():
+class HumanSmellDetector():
     def __init__(self,max_iaq,base_iaq):
         self.max_iaq = max_iaq
         self.base_iaq = base_iaq
@@ -24,7 +24,7 @@ class human_breath_detector():
 
 
 def setup_human_sound_detection():
-    model = human_breath_detector(MAX_IAQ,IAQ_base)
+    model = HumanSmellDetector(MAX_IAQ,IAQ_base)
     return model
 
 def predict_human_smell_detection(model):
