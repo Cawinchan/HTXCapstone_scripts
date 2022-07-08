@@ -25,7 +25,7 @@ void setup_bme680(void) {
     iaqSensor.updateSubscription(sensorList, 10, 1.0f);
     checkIaqSensorStatus();
     past_iaq = 350;
-}
+    }
 
 BMEReading sample_bme680(void) {
     if (iaqSensor.run()) {  // If new data is available
@@ -36,7 +36,6 @@ BMEReading sample_bme680(void) {
             iaqSensor.co2Equivalent,
             iaqSensor.breathVocEquivalent,
         };
-
         return output;
     } else {
         checkIaqSensorStatus();
@@ -44,8 +43,8 @@ BMEReading sample_bme680(void) {
 }
 
 String BMEReading_to_string(const BMEReading &bme_reading) {
-    String output = String(bme_reading.timeStamp/ 1000.0);
-    current_iaq = iaqSensor.iaq;
+    String output = String((unsigned long) bme_reading.timeStamp);
+    current_iaq = bme_reading.iaq;
     output += ", " + String(current_iaq);                         // IAQ values
     output += ", " + String(bme_reading.iaqAccuracy);             // When IAQ is ready to be used
     output += ", " + String(bme_reading.co2Equivalent);           // Co2Equivalent values

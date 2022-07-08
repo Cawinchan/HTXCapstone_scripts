@@ -4,7 +4,7 @@
 extern Bsec iaqSensor;
 
 struct BMEReading {
-    float timeStamp;
+    int64_t timeStamp;
     float iaq;
     uint8_t iaqAccuracy;
     float co2Equivalent;
