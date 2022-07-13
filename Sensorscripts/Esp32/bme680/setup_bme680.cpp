@@ -43,7 +43,7 @@ BMEReading sample_bme680(void) {
 }
 
 String BMEReading_to_string(const BMEReading &bme_reading) {
-    String output = String((unsigned long) bme_reading.timeStamp);
+    String output = String((unsigned long) float(bme_reading.timeStamp)/ 1000.0);
     current_iaq = bme_reading.iaq;
     output += ", " + String(current_iaq);                         // IAQ values
     output += ", " + String(bme_reading.iaqAccuracy);             // When IAQ is ready to be used
