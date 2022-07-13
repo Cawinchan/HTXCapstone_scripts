@@ -22,7 +22,10 @@ void setup_bme680(void) {
         BSEC_OUTPUT_SENSOR_HEAT_COMPENSATED_HUMIDITY
     };
 
-    iaqSensor.updateSubscription(sensorList, 10, 1.0f);
+    // Note: if the timing of gas measurements of the BME680 is not within 50% of the target values. For example, when running the sensor
+    // in low-power mode the intended sample period is 3 s. In this case the difference between two consecutive
+    // measurements must not exeed 150% of 3 s which is 4.5s, the IAQ values or equivalent CO2 values will not change.
+    iaqSensor.updateSubscription(sensorList, 10, 0.66666f);
     checkIaqSensorStatus();
     past_iaq = 350;
     }
@@ -49,7 +52,7 @@ String BMEReading_to_string(const BMEReading &bme_reading) {
     output += ", " + String(bme_reading.iaqAccuracy);             // When IAQ is ready to be used
     output += ", " + String(bme_reading.co2Equivalent);           // Co2Equivalent values
     output += ", " + String(bme_reading.breathVocEquivalent);     // BreathVocEquivalent values
-    output += ", " + String(((current_iaq / past_iaq) - 1)*1000); // IAQ Rate of Change
+    past_iaq = current_iaq;
     return output;
 }
 
