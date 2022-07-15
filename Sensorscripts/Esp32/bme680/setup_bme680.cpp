@@ -1,14 +1,20 @@
 #include "setup_bme680.h"
 
-Bsec iaqSensor;
-float current_iaq;
-float past_iaq;
+namespace bme680 {
+    // Create an object of the class Bsec
+    Bsec iaqSensor;
+    boolean disconnected = true;
+}
 
-void setup_bme680(void)
-{
-    iaqSensor.begin(BME680_I2C_ADDR_SECONDARY, Wire);
-    Serial.println("\nBSEC library version " + String(iaqSensor.version.major) + "." + String(iaqSensor.version.minor) + "." + String(iaqSensor.version.major_bugfix) + "." + String(iaqSensor.version.minor_bugfix));
-    checkIaqSensorStatus();
+void setup_bme680(void) {
+    bme680::iaqSensor.begin(BME680_I2C_ADDR_SECONDARY, Wire);
+
+    int rslt = checkIaqSensorStatus();
+    if (rslt < 0) {
+        bme680::disconnected = true;
+        Serial.println("setup_bme680: unable to communicate with sensor - disconnected");
+        return ;
+    }
 
     bsec_virtual_sensor_t sensorList[10] = {
         BSEC_OUTPUT_RAW_TEMPERATURE,
@@ -29,41 +35,45 @@ void setup_bme680(void)
     // BSEC_SAMPLE_RATE_LP          (0.33333f)         3s      !< Sample rate in case of Low Power Mode */
     // BSEC_SAMPLE_RATE_ULP         (0.0033333f)       5s      !< Sample rate in case of Ultra Low Power Mode */
 
-    iaqSensor.updateSubscription(sensorList, 10, BSEC_SAMPLE_RATE_CONTINUOUS);
-    checkIaqSensorStatus();
-    past_iaq = 350;
-}
-
-BMEReading sample_bme680(void)
-{
-    if (iaqSensor.run())
-    { // If new data is available
-        BMEReading output{
-            iaqSensor.nextCall,
-            iaqSensor.outputTimestamp,
-            iaqSensor.iaq,
-            iaqSensor.iaqAccuracy,
-            iaqSensor.co2Equivalent,
-            iaqSensor.breathVocEquivalent,
-        };
-        return output;
+    bme680::iaqSensor.updateSubscription(sensorList, 10, BSEC_SAMPLE_RATE_CONTINUOUS);
+    rslt = checkIaqSensorStatus();
+    if (rslt < 0) {
+        bme680::disconnected = true;
+        Serial.println("setup_bme680: unable to communicate with sensor - update failed");
+        return ;
     }
-    else
-    {
-        checkIaqSensorStatus();
+
+    if (bme680::disconnected) {
+        bme680::disconnected = false;
+        Serial.println("setup_bme680: BSEC library version " + String(bme680::iaqSensor.version.major) + "." +
+                    String(bme680::iaqSensor.version.minor) + "." + String(bme680::iaqSensor.version.major_bugfix) + "." +
+                    String(bme680::iaqSensor.version.minor_bugfix));
     }
 }
 
-String BMEReading_to_string(const BMEReading &bme_reading)
-{
-    String output = String(float(bme_reading.nextCall));
-    output += ", " +  String((unsigned long)float(bme_reading.timeStamp) / 1000.0);
-    current_iaq = bme_reading.iaq;
-    output += ", " + String(current_iaq);                     // IAQ values
-    output += ", " + String(bme_reading.iaqAccuracy);         // When IAQ is ready to be used
-    output += ", " + String(bme_reading.co2Equivalent);       // Co2Equivalent values
-    output += ", " + String(bme_reading.breathVocEquivalent); // BreathVocEquivalent values
-    past_iaq = current_iaq;
+int sample_bme680(BMEReading &reading) {
+    if (bme680::disconnected) {
+        return -1;
+    }
+    if (bme680::iaqSensor.run()) {  // If new data is available
+        reading.timeStamp = bme680::iaqSensor.outputTimestamp / 1000.0;
+        reading.iaq = bme680::iaqSensor.iaq;
+        reading.iaqAccuracy = bme680::iaqSensor.iaqAccuracy;
+        reading.co2Equivalent = bme680::iaqSensor.co2Equivalent;
+        reading.breathVocEquivalent = bme680::iaqSensor.breathVocEquivalent;
+
+        return 0;
+    } else {
+        return -1;
+    }
+}
+
+String BMEReading_to_string(const BMEReading &bme_reading) {
+    String output = String(bme_reading.timeStamp);
+    output += ", " + String(bme680::iaqSensor.iaq);                 // IAQ values
+    output += ", " + String(bme_reading.iaqAccuracy);             // When IAQ is ready to be used
+    output += ", " + String(bme_reading.co2Equivalent);           // Co2Equivalent values
+    output += ", " + String(bme_reading.breathVocEquivalent);     // BreathVocEquivalent values
     return output;
 }
 
@@ -89,42 +99,25 @@ int to_byte_array(const BMEReading &data, byte *byte_arr)
     return (sizeof_BMEReading);
 }
 
-void checkIaqSensorStatus(void)
-{
-    if (iaqSensor.status != BSEC_OK)
-    {
-        if (iaqSensor.status < BSEC_OK)
-        {
-            Serial.println("BSEC error code : " + String(iaqSensor.status));
-            for (;;)
-                errLeds(); /* Halt in case of failure */
-        }
-        else
-        {
-            Serial.println("BSEC warning code : " + String(iaqSensor.status));
+int checkIaqSensorStatus(void) {
+    if (bme680::iaqSensor.status != BSEC_OK) {
+        if (bme680::iaqSensor.status < BSEC_OK) {
+            Serial.println("BSEC error code : " + String(bme680::iaqSensor.status));
+            return -1;
+        } else {
+            Serial.println("BSEC warning code : " + String(bme680::iaqSensor.status));
+            return 0;
         }
     }
 
-    if (iaqSensor.bme680Status != BME680_OK)
-    {
-        if (iaqSensor.bme680Status < BME680_OK)
-        {
-            Serial.println("BME680 error code : " + String(iaqSensor.bme680Status));
-            for (;;)
-                errLeds(); /* Halt in case of failure */
-        }
-        else
-        {
-            Serial.println("BME680 warning code : " + String(iaqSensor.bme680Status));
+    if (bme680::iaqSensor.bme680Status != BME680_OK) {
+        if (bme680::iaqSensor.bme680Status < BME680_OK) {
+            Serial.println("BME680 error code : " + String(bme680::iaqSensor.bme680Status));
+            return -1;
+        } else {
+            Serial.println("BME680 warning code : " + String(bme680::iaqSensor.bme680Status));
+            return 0;
         }
     }
-}
-
-void errLeds(void)
-{
-    pinMode(LED_BUILTIN, OUTPUT);
-    digitalWrite(LED_BUILTIN, HIGH);
-    delay(100);
-    digitalWrite(LED_BUILTIN, LOW);
-    delay(100);
+    return 0;
 }

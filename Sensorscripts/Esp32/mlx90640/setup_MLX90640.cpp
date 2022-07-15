@@ -1,82 +1,102 @@
 #include "setup_MLX90640.h"
 
-float mlx90640To[mlx_reading_len];  // This stores the pixel value in degree celcius
-uint8_t mlx90640_reading[mlx_reading_len];  // This stores the pixel value normalised to 0-255
-paramsMLX90640 mlx90640;
+#define TA_SHIFT 8  // Default shift for MLX90640 in open air
+
+namespace mlx {
+    // Local variables
+    const byte address = 0x33;  // Default 7-bit unshifted address of the MLX90640
+    float degrees_buffer[reading_len];  // This stores the pixel value in degree celcius
+    uint8_t mlx90640_reading[reading_len];  // This stores the pixel value normalised to 0-255
+    paramsMLX90640 params;
+    boolean disconnected = true;
+}
 
 void setup_MLX90640() {
     Wire.begin();
     Wire.setClock(400000);  // Increase I2C clock speed to 400kHz
 
     if (isConnected() == false) {
-        Serial.println("MLX90640 not detected at default I2C address. Please check wiring.");
+        Serial.println("setup_MLX90640: unable to communicate with sensor - disconnected");
+        mlx::disconnected = true;
+        return;
     }
 
     // Get device parameters - We only have to do this once
     int status;
     uint16_t eeMLX90640[832];
-    status = MLX90640_DumpEE(MLX90640_address, eeMLX90640);
-    if (status != 0)
-        Serial.println("Failed to load system parameters");
+    status = MLX90640_DumpEE(mlx::address, eeMLX90640);
+    if (status != 0) {
+        Serial.println("setup_MLX90640: failed to load system parameters");
+        mlx::disconnected = true;
+        return;
+    }
 
-    status = MLX90640_ExtractParameters(eeMLX90640, &mlx90640);
-    if (status != 0)
-        Serial.println("Parameter extraction failed");
+    status = MLX90640_ExtractParameters(eeMLX90640, &mlx::params);
+    if (status != 0) {
+        Serial.println("setup_MLX90640: parameter extraction failed");
+        mlx::disconnected = true;
+        return;
+    }
 
     // Once params are extracted, we can release eeMLX90640 array
 
-    // MLX90640_SetRefreshRate(MLX90640_address, 0x02);  // Set rate to 2Hz
-    // MLX90640_SetRefreshRate(MLX90640_address, 0x03);  // Set rate to 4Hz
-    MLX90640_SetRefreshRate(MLX90640_address, 0x04);  // Set rate to 8Hz Most optimal speed to accuracy
-    // MLX90640_SetRefreshRate(MLX90640_address, 0x05);  // Set rate to 16Hz
+    // MLX90640_SetRefreshRate(mlx::address, 0x02);  // Set rate to 2Hz
+    // MLX90640_SetRefreshRate(mlx::address, 0x03);  // Set rate to 4Hz
+    MLX90640_SetRefreshRate(mlx::address, 0x04);  // Set rate to 8Hz Most optimal speed to accuracy
+    // MLX90640_SetRefreshRate(mlx::address, 0x05);  // Set rate to 16Hz
+    mlx::disconnected = false;
 }
 
-void sample_MLX90640(uint8_t* mlx90640_reading) {
+int sample_MLX90640(uint8_t* mlx90640_reading) {
+    if (mlx::disconnected) {
+        return -1;
+    }
     for (byte x = 0; x < 2; x++) {
         uint16_t mlx90640Frame[834];
-        int status = MLX90640_GetFrameData(MLX90640_address, mlx90640Frame);
+        int status = MLX90640_GetFrameData(mlx::address, mlx90640Frame);
 
         if (status < 0) {
             // An error has occured retrieving data
             Serial.println("error - MLX90640_API::MLX90640_GetFrameData() failed to get data");
+            return -1;
         }
 
-        float vdd = MLX90640_GetVdd(mlx90640Frame, &mlx90640);
-        float Ta = MLX90640_GetTa(mlx90640Frame, &mlx90640);
+        float vdd = MLX90640_GetVdd(mlx90640Frame, &mlx::params);
+        float Ta = MLX90640_GetTa(mlx90640Frame, &mlx::params);
 
         float tr = Ta - TA_SHIFT;  // Reflected temperature based on the sensor ambient temperature
         float emissivity = 0.95;
 
-        MLX90640_CalculateTo(mlx90640Frame, &mlx90640, emissivity, tr, mlx90640To);
-
-        // Normalise float to uint8_t
-        // This is to safe data transmission bandwidth.
-        // This is acceptable since the image will eventually be normalised to 0-255 range
-        // in the processing of life detection.
-        // Was previously degrees celcius, so we are losing some information here.
-        auto normalise_255 = [&mlx90640_reading]() {
-            // Find max and min
-            float max_temp;
-            float min_temp;
-            for (auto i : mlx90640To) {
-                if (max_temp < i) {
-                    max_temp = i;
-                }
-                if (min_temp > i) {
-                    min_temp = i;
-                }
-            }
-            float temp_range = max_temp - min_temp;
-
-            for (int i = 0; i < mlx_reading_len; i++) {
-                // normalized_temp range = [0,1]
-                float normalized_temp = (mlx90640To[i] - min_temp) / temp_range;
-                // Round off temp by int(x + 0.5)
-                mlx90640_reading[i] = int(normalized_temp * 255.0 + 0.5);
-            }
-        };
-        normalise_255();
+        MLX90640_CalculateTo(mlx90640Frame, &mlx::params, emissivity, tr, mlx::degrees_buffer);
     }
+    // Normalise float to uint8_t
+    // This is to safe data transmission bandwidth.
+    // This is acceptable since the image will eventually be normalised to 0-255 range
+    // in the processing of life detection.
+    // Was previously degrees celcius, so we are losing some information here.
+    auto normalise_255 = [&mlx90640_reading]() {
+        // Find max and min
+        float max_temp;
+        float min_temp;
+        for (auto i : mlx::degrees_buffer) {
+            if (max_temp < i) {
+                max_temp = i;
+            }
+            if (min_temp > i) {
+                min_temp = i;
+            }
+        }
+        float temp_range = max_temp - min_temp;
+
+        for (int i = 0; i < mlx::reading_len; i++) {
+            // normalized_temp range = [0,1]
+            float normalized_temp = (mlx::degrees_buffer[i] - min_temp) / temp_range;
+            // Round off temp by int(x + 0.5)
+            mlx90640_reading[i] = int(normalized_temp * 255.0 + 0.5);
+        }
+    };
+    normalise_255();
+    return 0;
 }
 
 String img_to_string(const uint8_t* mlx90640_reading, const int size_bytes) {
@@ -99,7 +119,7 @@ int to_byte_array(const uint8_t* data, const int size_bytes, byte* byte_arr) {
 }
 
 boolean isConnected() {
-    Wire.beginTransmission((uint8_t)MLX90640_address);
+    Wire.beginTransmission((uint8_t)mlx::address);
     if (Wire.endTransmission() != 0)
         return (false);  // Sensor did not ACK
     return (true);

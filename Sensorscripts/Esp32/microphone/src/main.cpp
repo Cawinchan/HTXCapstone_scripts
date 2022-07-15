@@ -8,10 +8,9 @@
 
 #include "config.h"
 
-
 int NUM_OF_SAMPLES = 1536;
 
-void record(I2SSampler *input, const char *fname)
+void record(I2SSampler *input)
 {
   int16_t *samples = (int16_t *)malloc(sizeof(int16_t) * NUM_OF_SAMPLES);
   // Start recording
@@ -42,7 +41,7 @@ void main_task(void *param)
 
   while (true)
   {
-    record(input, "/sdcard/test.wav");
+    record(input);
   }
 }
 

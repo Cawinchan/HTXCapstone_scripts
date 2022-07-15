@@ -14,19 +14,16 @@ void setup_ccs811(void) {
 
 }
 
-CCSReading sample_ccs811(void) {
+int sample_ccs811(CCSReading &reading) {
     if(ccs.available()){
         if(!ccs.readData()){
-        CCSReading output{
-            ccs.geteCO2(),
-            ccs.getTVOC()
-        };
-        return output;
+            reading.co2Equivalent = ccs.geteCO2();
+            reading.totalVoc = ccs.getTVOC();
+            return 0;
         }
     }
     else{
-      Serial.println("ERROR!");
-      while(1);
+      return -1;
   }
 }
 
