@@ -27,7 +27,7 @@ def setup_human_sound_detection():
     model = HumanSmellDetector(MAX_IAQ,IAQ_base)
     return model
 
-def predict_human_smell_detection(model):
+def predict_human_smell_detection_serial(model):
     ser = serial.Serial('COM4', 115200)
 
     sample = ser.readline()
@@ -55,3 +55,24 @@ def predict_human_smell_detection(model):
         human_likelihood_prob = 0
     return human_likelihood_prob
     
+def predict_human_smell_detection(model,sample):
+    arr = np.array(sample)
+    iaq = float(arr[1].strip())
+    iaq_accuracy = int(arr[2].strip())
+    iaq_roc = float(arr[-1].replace('\r\n',''))
+    human_likelihood_prob = 0
+    if iaq_accuracy < 1 and printer:
+        print("IAQ Warming up")
+        printer = False
+    if iaq_accuracy > 0 and not printer:
+        print("IAQ Done Warning up")
+        printer = True
+    # Signal change: Update IAQ_base value
+    if iaq_roc > 32 and iaq_accuracy > 0:
+        model.set_base(iaq)
+    human_likelihood_prob = model.predict(iaq)
+    if human_likelihood_prob > 1:
+        human_likelihood_prob = 1
+    if human_likelihood_prob < 0:
+        human_likelihood_prob = 0
+    return human_likelihood_prob
