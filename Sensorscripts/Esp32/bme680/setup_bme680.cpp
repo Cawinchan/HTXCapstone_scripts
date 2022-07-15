@@ -25,7 +25,11 @@ void setup_bme680(void) {
     // Note: if the timing of gas measurements of the BME680 is not within 50% of the target values. For example, when running the sensor
     // in low-power mode the intended sample period is 3 s. In this case the difference between two consecutive
     // measurements must not exeed 150% of 3 s which is 4.5s, the IAQ values or equivalent CO2 values will not change.
-    iaqSensor.updateSubscription(sensorList, 10, 0.66666f);
+    // BSEC_SAMPLE_RATE_CONTINUOUS  (1.0f)             1s      !< Sample rate in case of Continuous Mode */ 
+    // BSEC_SAMPLE_RATE_LP          (0.33333f)         3s      !< Sample rate in case of Low Power Mode */
+    // BSEC_SAMPLE_RATE_ULP         (0.0033333f)       5s      !< Sample rate in case of Ultra Low Power Mode */
+
+    iaqSensor.updateSubscription(sensorList, 10, BSEC_SAMPLE_RATE_LP);
     checkIaqSensorStatus();
     past_iaq = 350;
     }
