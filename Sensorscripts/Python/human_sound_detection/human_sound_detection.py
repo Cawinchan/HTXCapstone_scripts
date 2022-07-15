@@ -32,13 +32,25 @@ def int2float(sound):
     sound = sound.squeeze()  # depends on the use case
     return sound
 
-def predict_human_sound_detection(model):
+def predict_human_sound_detection_serial(model):
     ser = serial.Serial('COM4', 115200)
     
     sample = ser.readline()
     sample = sample.decode('utf-8') # decode from byte to string
     sample = sample.split(',')
 
+    arr = np.array(sample)
+
+    audio_int16 = arr.astype(np.int16)
+
+    audio_float32 = int2float(audio_int16)
+    
+    # get the human likelihood probability
+    human_likelihood_prob = model(torch.from_numpy(audio_float32), 16000).item()
+
+    return human_likelihood_prob
+
+def predict_human_sound_detection(model,sample):
     arr = np.array(sample)
 
     audio_int16 = arr.astype(np.int16)

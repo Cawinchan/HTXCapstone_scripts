@@ -31,10 +31,17 @@ class EnsembleModel():
                (self.human_sound_weightage * human_sound_prob) + \
                (self.human_body_weightage * human_body_prob) 
 
+    def set_weights(self,weights):
+        self.weights = weights
+
 def setup_ensemble_model():
     ensemble_model = EnsembleModel(WEIGHTS)
     return ensemble_model
 
 def predict_ensemble_model(model,human_smell_prob,human_sound_prob,human_body_prob):
     return model.predict(), human_smell_prob, human_sound_prob, human_body_prob
+
+def change_weights(model,weights):
+    model.set_weights(weights)
+    
 
