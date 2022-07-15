@@ -3,8 +3,8 @@
 #include <Sensorscripts/Esp32/microphone/src/I2SMEMSSampler.h>
 #include <Sensorscripts/Esp32/microphone/src/ADCSampler.h>
 // For usage of script without ROS
-// #include <src/I2SMEMSSampler.h>
-// #include <src/ADCSampler.h>
+// #include <I2SMEMSSampler.h>
+// #include <ADCSampler.h>
 
 #include "config.h"
 
