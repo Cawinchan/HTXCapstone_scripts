@@ -4,6 +4,7 @@
 extern Bsec iaqSensor;
 
 struct BMEReading {
+    int64_t nextCall;
     int64_t timeStamp;
     float iaq;
     uint8_t iaqAccuracy;
@@ -11,7 +12,8 @@ struct BMEReading {
     float breathVocEquivalent;
 };
 
-constexpr int sizeof_BMEReading = sizeof(BMEReading::timeStamp) +
+constexpr int sizeof_BMEReading = sizeof(BMEReading::nextCall) +
+                                  sizeof(BMEReading::timeStamp) +
                                   sizeof(BMEReading::iaq) +
                                   sizeof(BMEReading::iaqAccuracy) +
                                   sizeof(BMEReading::co2Equivalent) +
