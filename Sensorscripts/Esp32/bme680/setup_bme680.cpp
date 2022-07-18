@@ -57,11 +57,10 @@ int sample_bme680(BMEReading &reading) {
     }
     if (bme680::iaqSensor.run()) {  // If new data is available
         reading.timeStamp = bme680::iaqSensor.outputTimestamp / 1000.0;
-        reading.iaq = bme680::iaqSensor.iaq;
+        reading.iaq = bme680::iaqSensor.gasResistance;
         reading.iaqAccuracy = bme680::iaqSensor.iaqAccuracy;
         reading.co2Equivalent = bme680::iaqSensor.co2Equivalent;
         reading.breathVocEquivalent = bme680::iaqSensor.breathVocEquivalent;
-
         return 0;
     } else {
         return -1;
@@ -70,7 +69,7 @@ int sample_bme680(BMEReading &reading) {
 
 String BMEReading_to_string(const BMEReading &bme_reading) {
     String output = String(bme_reading.timeStamp);
-    output += ", " + String(bme680::iaqSensor.iaq);                 // IAQ values
+    output += ", " + String(1/bme680::iaqSensor.gasResistance);     // IAQ values
     output += ", " + String(bme_reading.iaqAccuracy);             // When IAQ is ready to be used
     output += ", " + String(bme_reading.co2Equivalent);           // Co2Equivalent values
     output += ", " + String(bme_reading.breathVocEquivalent);     // BreathVocEquivalent values
