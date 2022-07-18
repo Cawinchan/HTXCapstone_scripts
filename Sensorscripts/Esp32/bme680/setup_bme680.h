@@ -1,10 +1,7 @@
 #include "bsec.h"
 
-// Create an object of the class Bsec
-extern Bsec iaqSensor;
-
 struct BMEReading {
-    int64_t timeStamp;
+    double timeStamp;
     float iaq;
     uint8_t iaqAccuracy;
     float co2Equivalent;
@@ -22,7 +19,7 @@ void setup_bme680(void);
 
 // Sample once.
 // This function takes some time.
-BMEReading sample_bme680(void);
+int sample_bme680(BMEReading &reading);
 
 // Convert BMEReading to a string for printing.
 String BMEReading_to_string(const BMEReading &bme_reading);
@@ -33,5 +30,4 @@ String BMEReading_to_string(const BMEReading &bme_reading);
 int to_byte_array(const BMEReading &data, byte *byte_arr);
 
 // Helper function definitions
-void checkIaqSensorStatus(void);
-void errLeds(void);
+int checkIaqSensorStatus(void);

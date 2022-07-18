@@ -19,7 +19,7 @@ int setup_bmi160();
 // TODO:
 // Somehow 5ms interval is not achieving it, it becomes more like 25ms interval instead...
 // 40hz instead of 200hz
-IMUReading sample_bmi160();
+int sample_bmi160(IMUReading &imu_reading);
 
 // Convert IMUReading to a string for printing.
 String IMUReading_to_string(const IMUReading &imu_reading);

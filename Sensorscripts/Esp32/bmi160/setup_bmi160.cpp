@@ -1,59 +1,68 @@
 #include "setup_bmi160.h"
 
-DFRobot_BMI160 bmi160;
-const int8_t i2c_addr = 0x69;
+namespace imu{
+    DFRobot_BMI160 bmi160;
+    const int8_t i2c_addr = 0x69;
+    boolean disconnected = true;
+}
 
 int setup_bmi160() {
     // Init the hardware bmi160
-    if (bmi160.softReset() != BMI160_OK) {
-        Serial.println("reset false");
+    if (imu::bmi160.softReset() != BMI160_OK) {
+        Serial.println("setup_bmi160: unable to reset sensor");
+        imu::disconnected = true;
         return -1;
     }
 
     // Set and init the bmi160 i2c address
     // Can change this function such that it will change the config of the sensor....
     // Currently default is +/-2g range (can measure max 2g)
-    if (bmi160.I2cInit(i2c_addr) != BMI160_OK) {
-        Serial.println("init false");
+    if (imu::bmi160.I2cInit(imu::i2c_addr) != BMI160_OK) {
+        Serial.println("setup_bmi160: unable to communicate with sensor - disconnected");
+        imu::disconnected = true;
         return -1;
     }
 
+    imu::disconnected = false;
     return 0;
 }
 
-IMUReading sample_bmi160() {
+int sample_bmi160(IMUReading &imu_reading) {
+    if (imu::disconnected) {
+        return -1;
+    }
+
     int16_t accelGyro[6] = {0};
     uint32_t timestamp[2] = {0};
-    IMUReading output;
 
     // Get both accel and gyro data from bmi160
     // Parameter accelGyro and timestamp is the pointer to store the data
-    int rslt = bmi160.getAccelGyroData(accelGyro, timestamp);
+    int rslt = imu::bmi160.getAccelGyroData(accelGyro, timestamp);
     // Possible nonsense data: When the device is not connected, somehow rslt will still be valid
     // timestamp will be 16777215 and every element of accelGyro will be -1.
     // TODO: Solve for such an issue so that nonsense data doesn't get passed on to ROS.
 
     if (rslt == 0) {
         // timestamp[0] should be the same as timestamp[1], and therefore we only calc one.
-        output.timestamp = (timestamp[0] * 39) / 1000000.0;
+        imu_reading.timestamp = (timestamp[0] * 39) / 1000000.0;
         for (int i = 0; i < 6; i++) {
             if (i < 3) {
                 // The first three are gyro datas
                 // Angular velocity is in degrees [-180, 180], converted to rad
-                output.gyro[i] = (accelGyro[i] * 3.14159) / 180.0;
+                imu_reading.gyro[i] = (accelGyro[i] * 3.14159) / 180.0;
             } else {
                 // The following three data are accel datas
                 // In g after normalising by 2 ** 14
                 // * 9.80665 to convert to acceleration
-                output.accel[i - 3] = (accelGyro[i] / 16384.0) * 9.80665;
+                imu_reading.accel[i - 3] = (accelGyro[i] / 16384.0) * 9.80665;
             }
         }
 
     } else {
         Serial.println("sample_bmi160: error - unable to retrieve IMU reading");
-        output.timestamp = -1;
+        return -1;
     }
-    return output;
+    return 0;
 }
 
 String IMUReading_to_string(const IMUReading &imu_reading) {

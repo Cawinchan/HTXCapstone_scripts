@@ -29,9 +29,11 @@ Each indiviudal script can be opened by Arduino IDE, however the entire project 
   |        ├── microphone
   |        └── mlx90640
   |   └── Python 
-  |         ├── co2
-  |         ├── ir
-  |         └── microphone
+  |         ├── human smell detection 
+  |         ├── human sound detection
+  |         ├── human body detection
+  |         ├── ensemble_model.py
+  |         └── human_search_protocol.py
   |
   ├── .gitignore
   ├── README.md
@@ -75,6 +77,11 @@ Code should contain the following functions as API:
 
 
 ### Things to note
+For reference on how the APIs are implemented, can take a look at:
+
+* `struct`: bme680, bmi160, ccs811
+* `array`: mlx90640, microphone
+
 If the sensor uses a struct to keep track of the data received, be sure to do the following:
 * Initialize the struct in the header file.
 * Calculate the size of individual elements.

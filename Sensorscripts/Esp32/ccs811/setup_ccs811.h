@@ -17,7 +17,7 @@ void setup_ccs811(void);
 
 // Sample once.
 // This function takes some time.
-CCSReading sample_ccs811(void);
+int sample_ccs811(CCSReading &reading);
 
 // Convert CCSReading to a string for printing.
 String CCSReading_to_string(const CCSReading &ccs_reading);
