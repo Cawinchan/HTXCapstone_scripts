@@ -29,9 +29,11 @@ Each indiviudal script can be opened by Arduino IDE, however the entire project 
   |        ├── microphone
   |        └── mlx90640
   |   └── Python 
-  |         ├── co2
-  |         ├── ir
-  |         └── microphone
+  |         ├── human smell detection 
+  |         ├── human sound detection
+  |         ├── human body detection
+  |         ├── ensemble_model.py
+  |         └── human_search_protocol.py
   |
   ├── .gitignore
   ├── README.md
