@@ -1,0 +1,12 @@
+adafruit_ccs811==0.2.1
+board==1.0
+fastai==2.6.3
+matplotlib==3.3.4
+numpy==1.20.2
+opencv_python==4.5.4.60
+PyAudio==0.2.11
+pyserial==3.5
+smbus==1.1.post2
+torch==1.12.0
+torchaudio==0.11.0
+~orch==1.11.0
