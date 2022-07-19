@@ -7,6 +7,5 @@ opencv_python==4.5.4.60
 PyAudio==0.2.11
 pyserial==3.5
 smbus==1.1.post2
-torch==1.12.0
 torchaudio==0.11.0
-~orch==1.11.0
+torch==1.11.0
