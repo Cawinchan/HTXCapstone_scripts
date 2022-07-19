@@ -7,6 +7,7 @@ import serial
 
 MAX_IAQ = 250
 IAQ_base = 50 # Inital IAQ_base value 
+previous_IAQ = 50
 
 class HumanSmellDetector():
     def __init__(self,max_iaq,base_iaq):
@@ -28,6 +29,13 @@ def setup_human_sound_detection():
     return model
 
 def predict_human_smell_detection_serial(model):
+    '''
+        For local testing: Takes a human smell model, reads serial port and outputs a human likelihood probability
+        :param model: A human smell model
+        :return human_likelihood_prob: float
+
+        serial format ("timestamp","IAQ","iaqAccuracy","co2Equivalent","breathVocEquivalent")
+    '''
     ser = serial.Serial('COM4', 115200)
 
     sample = ser.readline()
@@ -36,43 +44,36 @@ def predict_human_smell_detection_serial(model):
 
     arr = np.array(sample)
     iaq = float(arr[1].strip())
-    iaq_accuracy = int(arr[2].strip())
-    iaq_roc = float(arr[-1].replace('\r\n',''))
+    iaq_roc = ((iaq / previous_IAQ) - 1) * 1000
     human_likelihood_prob = 0
-    if iaq_accuracy < 1 and printer:
-        print("IAQ Warming up")
-        printer = False
-    if iaq_accuracy > 0 and not printer:
-        print("IAQ Done Warning up")
-        printer = True
     # Signal change: Update IAQ_base value
-    if iaq_roc > 32 and iaq_accuracy > 0:
+    if iaq_roc > 32:
         model.set_base(iaq)
     human_likelihood_prob = model.predict(iaq)
     if human_likelihood_prob > 1:
         human_likelihood_prob = 1
     if human_likelihood_prob < 0:
         human_likelihood_prob = 0
+    previous_IAQ = iaq
     return human_likelihood_prob
     
-def predict_human_smell_detection(model,sample):
-    arr = np.array(sample)
-    iaq = float(arr[1].strip())
-    iaq_accuracy = int(arr[2].strip())
-    iaq_roc = float(arr[-1].replace('\r\n',''))
+def predict_human_smell_detection(model,current_iaq):
+    '''
+        For ROS: Takes a human smell model and iaq (equivalentCO2) readings and outputs a human likelihood probability
+        :param model: A human smell model 
+        :param current_iaq: str (a single equivalentCO2 value read)
+        :return human_likelihood_prob: float
+    '''
+    iaq = float(current_iaq.strip())
+    iaq_roc = ((iaq / previous_IAQ) - 1) * 1000
     human_likelihood_prob = 0
-    if iaq_accuracy < 1 and printer:
-        print("IAQ Warming up")
-        printer = False
-    if iaq_accuracy > 0 and not printer:
-        print("IAQ Done Warning up")
-        printer = True
     # Signal change: Update IAQ_base value
-    if iaq_roc > 32 and iaq_accuracy > 0:
+    if iaq_roc > 32:
         model.set_base(iaq)
     human_likelihood_prob = model.predict(iaq)
     if human_likelihood_prob > 1:
         human_likelihood_prob = 1
     if human_likelihood_prob < 0:
         human_likelihood_prob = 0
+    previous_IAQ = iaq
     return human_likelihood_prob
