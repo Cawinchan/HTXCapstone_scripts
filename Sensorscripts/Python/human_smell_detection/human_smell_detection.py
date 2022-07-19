@@ -55,7 +55,7 @@ def predict_human_smell_detection_serial(model):
         human_likelihood_prob = 0
     return human_likelihood_prob
     
-def predict_human_smell_detection(model,sample):
+def predict_human_smell_detection(model,iaq):
     arr = np.array(sample)
     iaq = float(arr[1].strip())
     iaq_accuracy = int(arr[2].strip())
