@@ -23,7 +23,7 @@ class HumanSmellDetector():
     def set_base(self, new_base_iaq):
         self.base_iaq = new_base_iaq
 
-def setup_human_sound_detection():
+def setup_human_smell_detection():
     model = HumanSmellDetector(MAX_IAQ,IAQ_base)
     return model
 

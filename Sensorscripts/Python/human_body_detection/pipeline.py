@@ -5,24 +5,24 @@ import glob
 import matplotlib.pyplot as plt
 import torch
 import gc; 
+import path
 
-models = ['resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet152',
-        #   'squeezenet1_0', 'squeezenet1_1',
+models = ['resnet34','resnet18', 
+         'resnet50', 'resnet101', 'resnet152',
+         'squeezenet1_0', 'squeezenet1_1',
           'densenet121', 'densenet169', 'densenet201', 'densenet161',
            'vgg16_bn', 'vgg19_bn',
-        #    'alexnet'
+         'alexnet'
          ]
 
 
 # Load the data path to images
 path = os.getcwd()
-thermal_path = os.path.join(path , 'img/thermal/')
-
+thermal_path = os.path.join('C:/Users/cawin/CodeProjects/SUTD/HTXCapstone_script/Sensorscripts/Python/IR/img/complete_thermal_image')
 # initalise list to store the total number of each class
 distribution = []
-
-for i in glob.glob(thermal_path+"/*"):
-    if i.split('/')[-1].split('_')[1] == 'nusiance':
+for i in glob.glob(os.path.join(thermal_path+"/*")):
+    if 'nusiance' in i:
         distribution.append('Nusiance')
     else:
         distribution.append('Person')
@@ -31,7 +31,7 @@ print(c)
 
 # Define the function to return the label
 def is_person(x):
-    if x.name.split('_')[1] == 'nusiance':
+    if 'nusiance' in x.name:
         return 'Nusiance'
     else:
         return 'Person'
@@ -66,5 +66,5 @@ for model in models:
         learn.fine_tune(10, base_lr=lr.valley, freeze_epochs=3) 
 
         # Export our trained model in form of pickle file
-        learn.export(fname='models/{}_person_classifier_v2.pkl'.format(model))
+        learn.save(fname='models/{}_person_classifier_v3.pkl'.format(model))
         print(model,"is done training")
