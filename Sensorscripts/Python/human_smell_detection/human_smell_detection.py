@@ -1,6 +1,7 @@
 # Python script for ROS interface using Serial communication for CO2
 
 # Imports 
+from decimal import DivisionByZero
 from email.mime import base
 import numpy as np
 import serial
@@ -22,7 +23,6 @@ class HumanSmellDetector():
     def set_base(self, new_base_iaq):
         self.base_iaq = new_base_iaq
 
-
 def setup_human_sound_detection():
     model = HumanSmellDetector(MAX_IAQ,IAQ_base)
     return model
@@ -43,7 +43,10 @@ def predict_human_smell_detection_serial(model):
 
     arr = np.array(sample)
     iaq = float(arr[1].strip())
-    iaq_roc = ((iaq / previous_IAQ) - 1) * 1000
+    try:
+        iaq_roc = ((iaq / previous_IAQ) - 1) * 1000
+    except:
+        iaq_roc = 0
     human_likelihood_prob = 0
     # Signal change: Update IAQ_base value
     if iaq_roc > 32:
@@ -60,11 +63,11 @@ def predict_human_smell_detection(model, previous_iaq, current_iaq):
     '''
         For ROS: Takes a human smell model and iaq (equivalentCO2) readings and outputs a human likelihood probability
         :param model: A human smell model 
-        :param previous_iaq: str (previous equivalentCO2 value read)
-        :param current_iaq: str (current equivalentCO2 value read)
+        :param previous_iaq: float (previous equivalentCO2 value read)
+        :param current_iaq: float (current equivalentCO2 value read)
         :return human_likelihood_prob: float
     '''
-    iaq = float(current_iaq.strip())
+    iaq = float(current_iaq)
     iaq_roc = ((iaq / previous_iaq) - 1) * 1000
     human_likelihood_prob = 0
     # Signal change: Update IAQ_base value
