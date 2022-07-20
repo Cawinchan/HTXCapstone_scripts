@@ -61,19 +61,18 @@ def predict_human_smell_detection(model,current_iaq):
     '''
         For ROS: Takes a human smell model and iaq (equivalentCO2) readings and outputs a human likelihood probability
         :param model: A human smell model 
-        :param current_iaq: str (a single equivalentCO2 value read)
+        :param current_iaq: float (a single equivalentCO2 value read)
         :return human_likelihood_prob: float
     '''
-    iaq = float(current_iaq.strip())
-    iaq_roc = ((iaq / previous_IAQ) - 1) * 1000
+    iaq_roc = ((current_iaq / previous_IAQ) - 1) * 1000
     human_likelihood_prob = 0
     # Signal change: Update IAQ_base value
     if iaq_roc > 32:
-        model.set_base(iaq)
-    human_likelihood_prob = model.predict(iaq)
+        model.set_base(current_iaq)
+    human_likelihood_prob = model.predict(current_iaq)
     if human_likelihood_prob > 1:
         human_likelihood_prob = 1
     if human_likelihood_prob < 0:
         human_likelihood_prob = 0
-    previous_IAQ = iaq
+    previous_IAQ = current_iaq
     return human_likelihood_prob
