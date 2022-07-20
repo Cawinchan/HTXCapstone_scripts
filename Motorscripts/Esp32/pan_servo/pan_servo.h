@@ -22,3 +22,7 @@ float get_pan_servo_pos();
 
 // Clip pan::pos to within [0, 180]
 void clip_pan_servo_degrees();
+
+// This function changes pan from left 0, right 180
+// to left 180, right 0
+float reverse_direction(float degree);
