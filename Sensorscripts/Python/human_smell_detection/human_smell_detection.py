@@ -69,11 +69,11 @@ def predict_human_smell_detection(model, previous_iaq, current_iaq):
     human_likelihood_prob = 0
     # Signal change: Update IAQ_base value
     if iaq_roc > 32:
-        model.set_base(iaq)
-    human_likelihood_prob = model.predict(iaq)
+        model.set_base(current_iaq)
+    human_likelihood_prob = model.predict(current_iaq)
     if human_likelihood_prob > 1:
         human_likelihood_prob = 1
     if human_likelihood_prob < 0:
         human_likelihood_prob = 0
-    previous_iaq = iaq
+    previous_iaq = current_iaq
     return human_likelihood_prob
