@@ -20,7 +20,10 @@ def td_to_img(f,tmax,tmin):
 def setup_human_body_detection(): 
     model = torch.jit.load(pathlib.Path.cwd() / os.path.dirname(os.path.realpath(__file__))/ 'models/resnet34_person_classifier_v5.pt')
     model.eval()
+<<<<<<< HEAD
     # /home/charlie/Desktop/LISA-ros/initial_ws/src/life_detection/src/HTXCapstone_scripts/Sensorscripts/Python/human_body_detection/models/resnet34_person_classifier_2022.1.pkl'
+=======
+>>>>>>> 08578cd62c5f472f7d10660688bf91b90bd840f4
     return model
 
 def predict_human_body_detection_serial(model):

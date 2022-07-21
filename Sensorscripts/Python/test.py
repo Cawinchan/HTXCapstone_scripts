@@ -8,27 +8,55 @@ from human_search_protocol import  expectation_maximization
 
 
 class HumanDetectionSetup(unittest.TestCase):
-    def testhuman_body_detection_process(self):
+    def test_setup_human_body_detection(self):
         """
-        Test human body detection can be loaded and predicted 
+        Test human body detection can be loaded
         """
 
         model = setup_human_body_detection()
         self.assertIsNotNone(model)
 
-    # def testhuman_smell_detection_process(self):
+    def test_setup_human_smell_detection(self):
+        """
+        Test human smell detection can be loaded
+        """
+        model = setup_human_smell_detection()
+        self.assertIsNotNone(model)
+
+    # def test_setup_human_sound_detection(self):
     #     """
-    #     Test human smell detection can be loaded and predicted 
+    #     Test human sound detection can be loaded
+    #     """
+    #     model = setup_human_sound_detection()
+    #     self.assertIsNotNone(model)
+
+    # def test_prediction_human_body_detection(self):
+    #     """
+    #     Test human body detection can be loaded and predicted
+    #     """
+
+    #     model = setup_human_body_detection()
+    #     self.assertIsNotNone(model)
+        
+
+    # def test_prediction_human_smell_detection(self):
+    #     """
+    #     Test human smell detection can be loaded and predicted
     #     """
     #     model = setup_human_smell_detection()
     #     self.assertIsNotNone(model)
 
-    # def testhuman_sound_detection_process(self):
+    # def test_prediction_human_sound_detection(self):
     #     """
-    #     Test human sound detection can be loaded and predicted 
+    #     Test human sound detection can be loaded and predicted
     #     """
     #     model = setup_human_sound_detection()
     #     self.assertIsNotNone(model)
+
+
+    #  predict_human_smell_detection(model, previous_iaq, current_iaq)
+
+
 
 if __name__ == '__main__':
     unittest.main()
