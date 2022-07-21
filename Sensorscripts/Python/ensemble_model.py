@@ -39,7 +39,7 @@ def setup_ensemble_model():
     return ensemble_model
 
 def predict_ensemble_model(model,human_smell_prob,human_sound_prob,human_body_prob):
-    return model.predict(), human_smell_prob, human_sound_prob, human_body_prob
+    return model.predict(human_smell_prob, human_sound_prob, human_body_prob), human_smell_prob, human_sound_prob, human_body_prob
 
 def change_weights(model,weights):
     model.set_weights(weights)

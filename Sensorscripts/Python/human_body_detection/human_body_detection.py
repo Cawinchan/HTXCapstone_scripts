@@ -1,23 +1,26 @@
+import platform
 import numpy as np
 import cv2
 import serial
-from fastai.vision.all import load_learner
 import sys
 import os
+import torch
 sys.path.append("..")
-from human_body_detection.custom_function import is_person
 
 # For windows systems
 import pathlib
 temp = pathlib.PosixPath
-pathlib.PosixPath = pathlib.WindowsPath
+if platform.system == 'Windows': 
+    pathlib.PosixPath = pathlib.WindowsPath
 
 def td_to_img(f,tmax,tmin):
     norm = np.uint8((f - tmin)*255/(tmax-tmin))
     return norm
 
 def setup_human_body_detection(): 
-    model = load_learner(pathlib.Path.cwd() / os.path.dirname(os.path.realpath(__file__))/ 'models/resnet34_person_classifier_2022.1.pkl')
+    model = torch.jit.load(pathlib.Path.cwd() / os.path.dirname(os.path.realpath(__file__))/ 'models/resnet34_person_classifier_v5.pt')
+    model.eval()
+    # /home/charlie/Desktop/LISA-ros/initial_ws/src/life_detection/src/HTXCapstone_scripts/Sensorscripts/Python/human_body_detection/models/resnet34_person_classifier_2022.1.pkl'
     return model
 
 def predict_human_body_detection_serial(model):
@@ -72,8 +75,6 @@ def predict_human_body_detection(model,sample,mlx_shape,tmax,tmin):
     
     """
     np.nan_to_num(0)
-    sample = np.array(sample)
-    sample = np.reshape(sample,mlx_shape)
 
     # If the difference between the hottest point and the coolest point is below a threshold value
     # make the image blank as it is highly likely to be ambient data
@@ -89,13 +90,18 @@ def predict_human_body_detection(model,sample,mlx_shape,tmax,tmin):
     # Upscale Image
     img = cv2.resize(img, (640,480), interpolation = cv2.INTER_CUBIC)
 
+    img = torch.FloatTensor(img)
+
+    img = img.view((3,480,640))
+    img = img.unsqueeze(0)
     # Model prediction
-    with model.no_bar():
+    with torch.no_grad():
         if (tmax - tmin > 3):
-            pred_class , _ , human_likelihood_prob = model.predict(img)
+            outputs = model(img)
+            _, human_likelihood_prob = torch.max(outputs,1)
         else: 
             human_likelihood_prob = 0
-    return human_likelihood_prob
+        return human_likelihood_prob
 
 # if __name__ == "__main__":  
 #     model = setup_human_body_detection()

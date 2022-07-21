@@ -5,7 +5,7 @@ import numpy as np
 import torch
 torch.set_num_threads(60)
 import torchaudio
-torchaudio.set_audio_backend("soundfile")
+# torchaudio.set_audio_backend("soundfile")
 import pyaudio
 import serial
 
@@ -19,8 +19,7 @@ CHUNK = int(SAMPLE_RATE / 10)
 def setup_human_sound_detection():
     model, _ = torch.hub.load(repo_or_dir='snakers4/silero-vad',
                                 model='silero_vad',
-                                force_reload=True)
-
+                                force_reload=False)
     return model
 
     # Provided by Alexander Veysov
@@ -59,6 +58,11 @@ def predict_human_sound_detection(model,sample):
     
     # get the human likelihood probability
     human_likelihood_prob = model(torch.from_numpy(audio_float32), 16000).item()
+    
+    if human_likelihood_prob > 1: 
+        human_likelihood_prob = 1 
+    if human_likelihood_prob < 0: 
+        human_likelihood_prob = 0 
 
     return human_likelihood_prob
     
