@@ -6,8 +6,8 @@ from email.mime import base
 import numpy as np
 import serial
 
-MAX_IAQ = 25
-IAQ_base = 10 # Inital IAQ_base value 
+MAX_IAQ = 20
+IAQ_base = 0 # Inital IAQ_base value 
 
 class HumanSmellDetector():
     def __init__(self,max_iaq,base_iaq):
@@ -16,7 +16,7 @@ class HumanSmellDetector():
 
     def predict(self,iaq):
         # Returns normalisation of iaq over range of max_iaq and base_iaq (0-100%)
-        return (iaq / (self.max_iaq-self.base_iaq))
+        return (iaq -  self.base_iaq/ (self.max_iaq - self.base_iaq))
     
     # Sets new base value when threshold is met to ensure that when the environment changes,
     # the base_IAQ is calibrated correctly
@@ -68,15 +68,12 @@ def predict_human_smell_detection(model, previous_iaq, current_iaq):
         :return human_likelihood_prob: float
     '''
     iaq = float(current_iaq)
-    iaq_roc = ((iaq / previous_iaq) - 1) * 1000
+    iaq_roc = abs(((iaq / previous_iaq) - 1) * 1000)
     human_likelihood_prob = 0
-    # Signal change: Update IAQ_base value
-    if iaq_roc > 32:
-        model.set_base(current_iaq)
-    human_likelihood_prob = model.predict(current_iaq)
+    human_likelihood_prob = model.predict(iaq_roc)
     if human_likelihood_prob > 1:
         human_likelihood_prob = 1
     if human_likelihood_prob < 0:
         human_likelihood_prob = 0
-    previous_iaq = current_iaq
+    previous_iaq = iaq
     return human_likelihood_prob
