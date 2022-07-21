@@ -1,7 +1,6 @@
 import unittest
 
 from human_body_detection.human_body_detection import setup_human_body_detection, predict_human_body_detection
-from human_body_detection.custom_function import is_person
 from human_smell_detection.human_smell_detection import setup_human_smell_detection, predict_human_smell_detection
 from human_sound_detection.human_sound_detection import setup_human_sound_detection, predict_human_sound_detection
 from ensemble_model import predict_ensemble_model
