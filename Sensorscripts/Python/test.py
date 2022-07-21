@@ -16,19 +16,19 @@ class HumanDetectionSetup(unittest.TestCase):
         model = setup_human_body_detection()
         self.assertIsNotNone(model)
 
-    # def testhuman_smell_detection_process(self):
-    #     """
-    #     Test human smell detection can be loaded and predicted 
-    #     """
-    #     model = setup_human_smell_detection()
-    #     self.assertIsNotNone(model)
+    def testhuman_smell_detection_process(self):
+        """
+        Test human smell detection can be loaded and predicted 
+        """
+        model = setup_human_smell_detection()
+        self.assertIsNotNone(model)
 
-    # def testhuman_sound_detection_process(self):
-    #     """
-    #     Test human sound detection can be loaded and predicted 
-    #     """
-    #     model = setup_human_sound_detection()
-    #     self.assertIsNotNone(model)
+    def testhuman_sound_detection_process(self):
+        """
+        Test human sound detection can be loaded and predicted 
+        """
+        model = setup_human_sound_detection()
+        self.assertIsNotNone(model)
 
 if __name__ == '__main__':
     unittest.main()
