@@ -42,11 +42,11 @@ void actuate_reel_servo(float degree) {
     // Rotate CCW - retract/move backward
     // Define rounds per minute... but writing 40 == 6 rpm
     if (degree > 0) {
-        reel::myservo.spin(140);  // was 40
+        reel::myservo.spin(120);  // was 40
     } else if (degree < 0) {
-        reel::myservo.spin(-140);  // was 140
+        reel::myservo.spin(-120);  // was 140
     } else {
-        reel::myservo.spin(degree);
+        reel::myservo.spin(0);
     }
 }
 

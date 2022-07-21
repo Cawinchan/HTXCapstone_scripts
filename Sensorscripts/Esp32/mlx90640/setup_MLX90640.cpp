@@ -47,7 +47,7 @@ void setup_MLX90640() {
     mlx::disconnected = false;
 }
 
-int sample_MLX90640(uint8_t* mlx90640_reading) {
+int sample_MLX90640(MLXReading &mlx90640_reading) {
     if (mlx::disconnected) {
         return -1;
     }
@@ -74,7 +74,7 @@ int sample_MLX90640(uint8_t* mlx90640_reading) {
     // This is acceptable since the image will eventually be normalised to 0-255 range
     // in the processing of life detection.
     // Was previously degrees celcius, so we are losing some information here.
-    auto normalise_255 = [&mlx90640_reading]() {
+    auto normalise_255_get_reading = [&mlx90640_reading]() {
         // Find max and min
         float max_temp;
         float min_temp;
@@ -92,30 +92,52 @@ int sample_MLX90640(uint8_t* mlx90640_reading) {
             // normalized_temp range = [0,1]
             float normalized_temp = (mlx::degrees_buffer[i] - min_temp) / temp_range;
             // Round off temp by int(x + 0.5)
-            mlx90640_reading[i] = int(normalized_temp * 255.0 + 0.5);
+            mlx90640_reading.image[i] = int(normalized_temp * 255.0 + 0.5);
         }
+        mlx90640_reading.tmin = min_temp;
+        mlx90640_reading.tmax = max_temp;
     };
-    normalise_255();
+    normalise_255_get_reading();
     return 0;
 }
 
-String img_to_string(const uint8_t* mlx90640_reading, const int size_bytes) {
+String MLXReading_to_string(const MLXReading &mlx90640_reading) {
+    String output = String(mlx90640_reading.tmin);
+    output += ", " + String(mlx90640_reading.tmax);
+    output += "\n";
+
     String img_string;
 
-    const int arr_len = size_bytes / sizeof(mlx90640_reading[0]);
+    const int arr_len = sizeof(mlx90640_reading.image) / sizeof(mlx90640_reading.image[0]);
 
     for (int i = 0; i < arr_len; i++) {
-        img_string += String(mlx90640_reading[i]);
+        img_string += String(mlx90640_reading.image[i]);
         if (i != arr_len - 1) {
             img_string += ",";
         }
     }
-    return img_string;
+    return output + img_string;
 }
 
-int to_byte_array(const uint8_t* data, const int size_bytes, byte* byte_arr) {
-    memcpy(byte_arr, data, size_bytes);
-    return size_bytes;
+int to_byte_array(const MLXReading &data, byte *byte_arr) {
+    // memcpy(byte_arr, data, size_bytes);
+    // return size_bytes;
+
+    int data_in = 0;
+
+    // This lambda function is to increment the data_in pointer,
+    // so that it writes into the whole data array.
+    // Since C++ does not allow multiple type arguments, we need to cast to char* first.
+    auto load_data = [&data, &data_in, &byte_arr](const char *element, const int size) {
+        memcpy(byte_arr + data_in, element, size);
+        data_in += size;
+    };
+
+    load_data((char *)&data.tmin, sizeof(data.tmin));
+    load_data((char *)&data.tmax, sizeof(data.tmax));
+    load_data((char *)&data.image, sizeof(data.image));
+
+    return (sizeof_MLXReading);
 }
 
 boolean isConnected() {

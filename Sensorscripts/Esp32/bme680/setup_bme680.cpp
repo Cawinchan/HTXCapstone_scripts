@@ -57,7 +57,10 @@ int sample_bme680(BMEReading &reading) {
     }
     if (bme680::iaqSensor.run()) {  // If new data is available
         reading.timeStamp = bme680::iaqSensor.outputTimestamp / 1000.0;
-        reading.iaq = bme680::iaqSensor.gasResistance;
+        reading.iaq = (1 /(0.75 * bme680::iaqSensor.gasResistance 
+                                + 0.20 * bme680::iaqSensor.rawHumidity 
+                                + 0.05 * bme680::iaqSensor.rawTemperature) 
+                                * 1000000);
         reading.iaqAccuracy = bme680::iaqSensor.iaqAccuracy;
         reading.co2Equivalent = bme680::iaqSensor.co2Equivalent;
         reading.breathVocEquivalent = bme680::iaqSensor.breathVocEquivalent;
@@ -70,12 +73,7 @@ int sample_bme680(BMEReading &reading) {
 
 String BMEReading_to_string(const BMEReading &bme_reading) {
     String output = String(bme_reading.timeStamp);
-    output += ", " + String(
-                                (1 /(0.75 * bme680::iaqSensor.gasResistance 
-                                + 0.20 * bme680::iaqSensor.rawHumidity 
-                                + 0.05 * bme680::iaqSensor.rawTemperature) 
-                                * 1000000)
-                            );     // IAQ values (Since we only care about the relative values x10000 causes no change relatively)
+    output += ", " + String(bme_reading.iaq);     // IAQ values (Since we only care about the relative values x10000 causes no change relatively)
     output += ", " + String(bme_reading.iaqAccuracy);             // When IAQ is ready to be used
     output += ", " + String(bme_reading.co2Equivalent);           // Co2Equivalent values
     output += ", " + String(bme_reading.breathVocEquivalent);     // BreathVocEquivalent values
