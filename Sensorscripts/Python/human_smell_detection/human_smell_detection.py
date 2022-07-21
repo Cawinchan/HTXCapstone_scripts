@@ -75,5 +75,4 @@ def predict_human_smell_detection(model, previous_iaq, current_iaq):
         human_likelihood_prob = 1
     if human_likelihood_prob < 0:
         human_likelihood_prob = 0
-    previous_iaq = iaq
     return human_likelihood_prob
