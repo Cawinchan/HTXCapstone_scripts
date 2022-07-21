@@ -16,6 +16,7 @@ namespace pan {
     const int TIMER_WIDTH = 16;
     const int COUNT_LOW = 1638;
     const int COUNT_HIGH = 7864;
+    const int MAX_DEGREE = 180;  // Assuming 0 is the MIN_DEGREE
 }  // namespace pan
 
 int setup_pan_servo() {
@@ -37,13 +38,16 @@ void actuate_pan_servo(float degree) {
     clip_pan_servo_degrees();
 
     // Send signal to motor through PWM
-    set_pan_servo_pos(pan::pos);
+    // In the degrees passed in, as per convention +ve is right, -ve as left.
+    // However, as the motor is flipped, to make it turn right, we need to take 180 - degree
+    // ie. 0 is fully right, 180 is fully left
+    set_pan_servo_pos(reverse_direction(pan::pos));
 }
 
 void set_pan_servo_pos(float degree) {
     // convert 0-180 degrees to 1638-7864
     // int(x + 0.5) is used to round off the value.
-    uint32_t duty = int(((degree / 180.0) * (pan::COUNT_HIGH - pan::COUNT_LOW)) + pan::COUNT_LOW + 0.5);
+    uint32_t duty = int(((degree / pan::MAX_DEGREE) * (pan::COUNT_HIGH - pan::COUNT_LOW)) + pan::COUNT_LOW + 0.5);
 
     // set channel to pos
     ledcWrite(pan::PAN_SERVO_CHANNEL, duty);
@@ -52,7 +56,7 @@ void set_pan_servo_pos(float degree) {
 float get_pan_servo_pos() {
     uint32_t duty = ledcRead(pan::PAN_SERVO_CHANNEL);
     float degree = ((duty - pan::COUNT_LOW) / float(pan::COUNT_HIGH - pan::COUNT_LOW)) * 180.0;
-    return degree;
+    return reverse_direction(degree);
 }
 
 void clip_pan_servo_degrees() {
@@ -61,4 +65,8 @@ void clip_pan_servo_degrees() {
     } else if (pan::pos < 0) {
         pan::pos = 0;
     }
+}
+
+float reverse_direction(float degree) {
+    return pan::MAX_DEGREE - degree;
 }
