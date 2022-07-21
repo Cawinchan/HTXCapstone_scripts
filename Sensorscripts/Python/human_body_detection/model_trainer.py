@@ -5,7 +5,6 @@ import glob
 import matplotlib.pyplot as plt
 import torch
 import gc; 
-import path
 
 model = 'resnet34'
 model_name = 'person_classifier_v3'
@@ -13,9 +12,10 @@ model_name = 'person_classifier_v3'
 if __name__ == '__main__':
     # Load the data path to images
     path = os.getcwd()
-    thermal_path = os.path.join('C:/Users/cawin/CodeProjects/SUTD/HTXCapstone_script/Sensorscripts/Python/IR/img/complete_thermal_image')
+    thermal_path = os.path.join('/home/charlie/HTXCapstone_scripts/Sensorscripts/Python/IR/img/thermal')
     # initalise list to store the total number of each class
     distribution = []
+    
     for i in glob.glob(os.path.join(thermal_path+"/*")):
         if 'nusiance' in i:
             distribution.append('Nusiance')

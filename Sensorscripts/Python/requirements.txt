@@ -9,3 +9,4 @@ pyserial==3.5
 smbus==1.1.post2
 torchaudio==0.11.0
 torch==1.11.0
+torchvision==1.12.0

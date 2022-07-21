@@ -6,8 +6,8 @@ from email.mime import base
 import numpy as np
 import serial
 
-MAX_IAQ = 250
-IAQ_base = 50 # Inital IAQ_base value 
+MAX_IAQ = 25
+IAQ_base = 10 # Inital IAQ_base value 
 
 class HumanSmellDetector():
     def __init__(self,max_iaq,base_iaq):
