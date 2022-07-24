@@ -5,7 +5,7 @@ import numpy as np
 import torch
 torch.set_num_threads(60)
 import torchaudio
-# torchaudio.set_audio_backend("soundfile")
+torchaudio.set_audio_backend("soundfile")
 import pyaudio
 import serial
 
@@ -47,22 +47,22 @@ def predict_human_sound_detection_serial(model):
     # get the human likelihood probability
     human_likelihood_prob = model(torch.from_numpy(audio_float32), 16000).item()
 
-    return human_likelihood_prob
+    return human_likelihood_prob    
 
 def predict_human_sound_detection(model,sample):
-    arr = np.array(sample)
+    arr = np.array(sample)  
 
     audio_int16 = arr.astype(np.int16)
 
     audio_float32 = int2float(audio_int16)
     
     # get the human likelihood probability
-    human_likelihood_prob = model(torch.from_numpy(audio_float32), 16000).item()
+    human_likelihood_prob = model(torch.from_numpy(audio_float32), 8000).item()
     
     if human_likelihood_prob > 1: 
         human_likelihood_prob = 1 
     if human_likelihood_prob < 0: 
         human_likelihood_prob = 0 
-
+    
     return human_likelihood_prob
     

@@ -14,7 +14,6 @@
  * date  2018-1-15
  */
 #include <ros.h>
-// #include <std_msgs/String.h>
 #include <motor_controller/UserMovementCmd.h>
 
 #include "DFRobot_MCP4725.h"
@@ -55,8 +54,6 @@ ros::NodeHandle  nh;
 ros::Subscriber<motor_controller::UserMovementCmd> sub("/user_movement", &callback);
 
 void setup() {
-//  Serial.begin(115200);
-//  Serial.println("starting up");
   /* MCP4725A0_address is 0x60 or 0x61
    * MCP4725A0_IIC_Address0 -->0x60
    * MCP4725A0_IIC_Address1 -->0x61
@@ -68,5 +65,5 @@ void setup() {
 
 void loop() {
   nh.spinOnce();
-  delay(50);  // TODO: figure out how much to spin
+  delay(50);  // this is arbitrarily set
 }
