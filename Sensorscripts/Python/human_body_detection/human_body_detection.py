@@ -5,6 +5,9 @@ import serial
 import sys
 import os
 import torch
+import matplotlib.pyplot as plt
+import torchvision.transforms as T
+from PIL import Image
 sys.path.append("..")
 
 # For windows systems
@@ -13,14 +16,116 @@ temp = pathlib.PosixPath
 if platform.system == 'Windows': 
     pathlib.PosixPath = pathlib.WindowsPath
 
-def td_to_img(f,tmax,tmin):
-    norm = np.uint8((f - tmin)*255/(tmax-tmin))
-    return norm
+# colors for visualization
+COLORS = [[0.000, 0.447, 0.741], [0.850, 0.325, 0.098], [0.929, 0.694, 0.125],
+          [0.494, 0.184, 0.556], [0.466, 0.674, 0.188], [0.301, 0.745, 0.933]]
+          
+# standard PyTorch mean-std input image normalization
+transform = T.Compose([
+    T.Resize(800),
+    T.ToTensor(),
+    T.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+])
+
+# for output bounding box post-processing
+def box_cxcywh_to_xyxy(x):
+    x_c, y_c, w, h = x.unbind(1)
+    b = [(x_c - 0.5 * w), (y_c - 0.5 * h),
+         (x_c + 0.5 * w), (y_c + 0.5 * h)]
+    return torch.stack(b, dim=1)
+
+def rescale_bboxes(out_bbox, size):
+    img_w, img_h = size
+    b = box_cxcywh_to_xyxy(out_bbox)
+    b = b * torch.tensor([img_w, img_h, img_w, img_h], dtype=torch.float32).to('cuda')
+    return b
+
+def plot_finetuned_results(pil_img, prob=None, boxes=None, save_dir=False, one_box=True):
+    finetuned_classes = ['human']
+    plt.figure(figsize=(16,10))
+    plt.imshow(pil_img)
+    ax = plt.gca()
+    colors = COLORS * 100
+    if one_box:
+      if prob is not None and boxes is not None:
+        highest_prob_idx = torch.argmax(prob,axis=1)
+        boxes = boxes[highest_prob_idx]
+        prob = prob[highest_prob_idx]
+        for p, (xmin, ymin, xmax, ymax), c in zip(prob, boxes.tolist(), colors):
+            ax.add_patch(plt.Rectangle((xmin, ymin), xmax - xmin, ymax - ymin,
+                                      fill=False, color=c, linewidth=3))
+            cl = p.argmax()
+            text = f'{finetuned_classes[cl]}: {p[cl]:0.2f}'
+            ax.text(xmin, ymin, text, fontsize=15,
+                    bbox=dict(facecolor='yellow', alpha=0.5))
+    else:
+      if prob is not None and boxes is not None:
+        for p, (xmin, ymin, xmax, ymax), c in zip(prob, boxes.tolist(), colors):
+            ax.add_patch(plt.Rectangle((xmin, ymin), xmax - xmin, ymax - ymin,
+                                      fill=False, color=c, linewidth=3))
+            cl = p.argmax()
+            text = f'{finetuned_classes[cl]}: {p[cl]:0.2f}'
+            ax.text(xmin, ymin, text, fontsize=15,
+                    bbox=dict(facecolor='yellow', alpha=0.5))
+    plt.axis('off')
+    if save_dir:
+      plt.savefig(save_dir)
+    plt.show()
+
+def filter_bboxes_from_outputs(pil_image, outputs,
+                               threshold=0.7):
+  
+  # keep only predictions with confidence above threshold
+  probas = outputs['pred_logits'].softmax(-1)[0, :, :-1]
+  keep = probas.max(-1).values > threshold
+
+  probas_to_keep = probas[keep]
+
+  # convert boxes from [0; 1] to image scales
+  bboxes_scaled = rescale_bboxes(outputs['pred_boxes'][0, keep], pil_image.size)
+  
+  return probas_to_keep, bboxes_scaled
+
+def run_workflow(my_image, my_model, save_dir=False):
+  # mean-std normalize the input image (batch-size: 1)
+  img = transform(my_image).unsqueeze(0)
+  img = img.to('cuda')
+  # propagate through the model
+  # DETR-RESNET101 takes 0.12s/120ms
+  outputs = my_model(img)
+
+  for threshold in [0.9, 0.7]:
+    
+    probas_to_keep, bboxes_scaled = filter_bboxes_from_outputs(my_image,outputs,
+                                                              threshold=threshold)
+
+    plot_finetuned_results(my_image,
+                           probas_to_keep, 
+                           bboxes_scaled,
+                           save_dir=save_dir)
+  if len(probas_to_keep) > 1:
+    return torch.max(probas_to_keep), bboxes_scaled[torch.argmax(probas_to_keep)]
+  if len(probas_to_keep) == 1:
+    return probas_to_keep, bboxes_scaled
+  else:
+    return 0, 0
 
 def setup_human_body_detection(): 
-    model = torch.jit.load(pathlib.Path.cwd() / os.path.dirname(os.path.realpath(__file__))/ 'models/resnet34_person_classifier_v4.pt')
+    num_classes = 1
+
+    model = torch.hub.load('facebookresearch/detr',
+                        'detr_resnet101',
+                        pretrained=False,
+                        num_classes=num_classes)
+
+    checkpoint = torch.load(pathlib.Path.cwd() / os.path.dirname(os.path.realpath(__file__))/ 'models/detr_40_epoch.pth',
+                            map_location='cuda')
+
+    model.load_state_dict(checkpoint['model'],
+                        strict=False)
+    model.to('cuda')
+
     model.eval()
-    # /home/charlie/Desktop/LISA-ros/initial_ws/src/life_detection/src/HTXCapstone_scripts/Sensorscripts/Python/human_body_detection/models/resnet34_person_classifier_2022.1.pkl'
     return model
 
 def predict_human_body_detection_serial(model):
@@ -62,7 +167,6 @@ def predict_human_body_detection_serial(model):
     return human_likelihood_prob
 
 def preprocessing_human_body_detection(sample,tmax,tmin):
-    print(sample)
     np.nan_to_num(0)
 
     # If the difference between the hottest point and the coolest point is below a threshold value
@@ -75,12 +179,12 @@ def preprocessing_human_body_detection(sample,tmax,tmin):
 
     # Image processing to resize for model
     # Colour grayscale image
-    img = cv2.applyColorMap(sample, cv2.COLORMAP_JET)
+    img = cv2.applyColorMap(cv2.bitwise_not(np.array(sample).astype(np.uint8)), cv2.COLORMAP_JET)
     # Upscale Image
     img = cv2.resize(img, (640,480), interpolation = cv2.INTER_CUBIC)
     return img
-
-def predict_human_body_detection(model,img,tmax,tmin):
+    
+def predict_human_body_detection(model,img,tmax=255,tmin=0):
     """
     Takes the model and sample given by ROS to do human body prediction. 
     The current shape of the model is mlx_shape, tmax and tmin
@@ -93,18 +197,13 @@ def predict_human_body_detection(model,img,tmax,tmin):
     :return human_likelihood_prob: float
     
     """
-    img = torch.FloatTensor(img)
+    pil_image = Image.fromarray(img)
 
-    img = img.view((3,480,640))
-    img = img.unsqueeze(0)
     # Model prediction
-    with torch.no_grad():
-        if (tmax - tmin > 3):
-            outputs = model(img)
-            _, human_likelihood_prob = torch.max(outputs,1)
-        else: 
-            human_likelihood_prob = 0
-        return human_likelihood_prob
+
+    # TO-DO: Pass prediction box to JK
+    human_likelihood_prob, box = run_workflow(pil_image, model)
+    return human_likelihood_prob
 
 # if __name__ == "__main__":  
 #     model = setup_human_body_detection()
