@@ -18,7 +18,7 @@ def td_to_img(f,tmax,tmin):
     return norm
 
 def setup_human_body_detection(): 
-    model = torch.jit.load(pathlib.Path.cwd() / os.path.dirname(os.path.realpath(__file__))/ 'models/resnet34_person_classifier_v5.pt')
+    model = torch.jit.load(pathlib.Path.cwd() / os.path.dirname(os.path.realpath(__file__))/ 'models/resnet34_person_classifier_v4.pt')
     model.eval()
     # /home/charlie/Desktop/LISA-ros/initial_ws/src/life_detection/src/HTXCapstone_scripts/Sensorscripts/Python/human_body_detection/models/resnet34_person_classifier_2022.1.pkl'
     return model
@@ -61,19 +61,8 @@ def predict_human_body_detection_serial(model):
             human_likelihood_prob = 0
     return human_likelihood_prob
 
-def predict_human_body_detection(model,sample,mlx_shape,tmax,tmin):
-    """
-    Takes the model and sample given by ROS to do human body prediction. 
-    The current shape of the model is mlx_shape, tmax and tmin
-
-    :param model: fastai.vision.all()
-    :param sample: list(int16)
-    :param mlx_shape: (int,int)
-    :param tmax: int
-    :param tmin: int
-    :return human_likelihood_prob: float
-    
-    """
+def preprocessing_human_body_detection(sample,tmax,tmin):
+    print(sample)
     np.nan_to_num(0)
 
     # If the difference between the hottest point and the coolest point is below a threshold value
@@ -89,7 +78,21 @@ def predict_human_body_detection(model,sample,mlx_shape,tmax,tmin):
     img = cv2.applyColorMap(sample, cv2.COLORMAP_JET)
     # Upscale Image
     img = cv2.resize(img, (640,480), interpolation = cv2.INTER_CUBIC)
+    return img
 
+def predict_human_body_detection(model,img,tmax,tmin):
+    """
+    Takes the model and sample given by ROS to do human body prediction. 
+    The current shape of the model is mlx_shape, tmax and tmin
+
+    :param model: fastai.vision.all()
+    :param sample: list(int16)
+    :param mlx_shape: (int,int)
+    :param tmax: int
+    :param tmin: int
+    :return human_likelihood_prob: float
+    
+    """
     img = torch.FloatTensor(img)
 
     img = img.view((3,480,640))

@@ -16,7 +16,7 @@ class HumanSmellDetector():
 
     def predict(self,iaq):
         # Returns normalisation of iaq over range of max_iaq and base_iaq (0-100%)
-        return (iaq -  self.base_iaq/ (self.max_iaq - self.base_iaq))
+        return ((iaq -  self.base_iaq) / (self.max_iaq - self.base_iaq))
     
     # Sets new base value when threshold is met to ensure that when the environment changes,
     # the base_IAQ is calibrated correctly
@@ -75,5 +75,4 @@ def predict_human_smell_detection(model, previous_iaq, current_iaq):
         human_likelihood_prob = 1
     if human_likelihood_prob < 0:
         human_likelihood_prob = 0
-    previous_iaq = iaq
     return human_likelihood_prob
