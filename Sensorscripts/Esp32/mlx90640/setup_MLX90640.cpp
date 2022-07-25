@@ -76,8 +76,9 @@ int sample_MLX90640(MLXReading &mlx90640_reading) {
     // Was previously degrees celcius, so we are losing some information here.
     auto normalise_255_get_reading = [&mlx90640_reading]() {
         // Find max and min
-        float max_temp;
-        float min_temp;
+        // Initialise the variables to be way higher than possible
+        float max_temp = -100.0;
+        float min_temp = 100.0;
         for (auto i : mlx::degrees_buffer) {
             if (max_temp < i) {
                 max_temp = i;
@@ -86,7 +87,7 @@ int sample_MLX90640(MLXReading &mlx90640_reading) {
                 min_temp = i;
             }
         }
-        float temp_range = max_temp - min_temp;
+        const float temp_range = max_temp - min_temp;
 
         for (int i = 0; i < mlx::reading_len; i++) {
             // normalized_temp range = [0,1]

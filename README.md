@@ -79,8 +79,8 @@ Code should contain the following functions as API:
 ### Things to note
 For reference on how the APIs are implemented, can take a look at:
 
-* `struct`: bme680, bmi160, ccs811
-* `array`: mlx90640, microphone
+* `struct`: bme680, bmi160, ccs811, mlx90640
+* `array`: microphone
 
 If the sensor uses a struct to keep track of the data received, be sure to do the following:
 * Initialize the struct in the header file.
