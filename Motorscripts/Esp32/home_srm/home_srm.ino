@@ -24,6 +24,8 @@ DFRobot_MCP4725 DAC;
 //For calibration, enter 5000 below and measure the output voltage... change the REF_VOLTAGE above to the measured value
 uint16_t OUTPUT_VOLTAGE = 2000;    // Enter default desired DAC output voltage (unit: mV)
 
+bool ITV_ON = false;
+
 //unreeling - increase to 1000mV voltage 
 //panning - 0000mV
 //homming - 3000mV
@@ -35,18 +37,25 @@ void callback(const motor_controller::UserMovementCmd &movement_msg) {
   } else if (movement_msg.move > 0) {
     // Unreeling requires added low pressure to grow the tube
     OUTPUT_VOLTAGE = 1000; //in mV
+    ITV_ON = true;
   } else if (movement_msg.move < 0) {
     // Retraction requires pressure to be 0 
     OUTPUT_VOLTAGE = 0000; //in mV
   } else if (movement_msg.home_srm) {
     // Homing requires added higher pressure to push SRM
     OUTPUT_VOLTAGE = 3000; //in mV
+    ITV_ON = true;
   } else {
     // Do nothing
     return;
   }
   //assign output voltage to the DAC board
   DAC.outputVoltage(OUTPUT_VOLTAGE); 
+}
+
+void off_itv() {
+  DAC.outputVoltage(0000);
+  ITV_ON = false;
 }
 
 ros::NodeHandle  nh;
@@ -64,6 +73,7 @@ void setup() {
 }
 
 void loop() {
-  nh.spinOnce();
+  nh.spinOnce();  // process all callbacks
   delay(50);  // this is arbitrarily set
+  off_itv();
 }
