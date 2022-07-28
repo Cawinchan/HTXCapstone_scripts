@@ -26,3 +26,7 @@ void clip_pan_servo_degrees();
 // This function changes pan from left 0, right 180
 // to left 180, right 0
 float reverse_direction(float degree);
+
+// Convert to byte array for transmission.
+// Returns the length of byte array.
+int to_byte_array(const float& data, byte* byte_arr);

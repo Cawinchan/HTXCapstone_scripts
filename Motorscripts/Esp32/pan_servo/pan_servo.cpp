@@ -70,3 +70,8 @@ void clip_pan_servo_degrees() {
 float reverse_direction(float degree) {
     return pan::MAX_DEGREE - degree;
 }
+
+int to_byte_array(const float& data, byte* byte_arr) {
+    memcpy(byte_arr, &data, sizeof(data));
+    return sizeof(data);
+}
